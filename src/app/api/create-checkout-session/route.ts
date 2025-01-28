@@ -20,7 +20,8 @@ export async function POST(req: Request) {
     }
 
     // Initialize Supabase client with cookies
-    const supabase = createRouteHandlerClient({ cookies })
+    const cookieStore = await cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
     // Get the user from the session
     const { data, error: sessionError } = await supabase.auth.getSession()
@@ -84,7 +85,7 @@ export async function POST(req: Request) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?canceled=true`,
       metadata: {
-        userId,
+        userId: session.user.id,
       },
     })
 

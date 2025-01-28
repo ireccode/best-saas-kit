@@ -9,7 +9,8 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const cookieStore = await cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
     const { messages } = await req.json()
 
     // Check authentication

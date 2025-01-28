@@ -4,8 +4,8 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Best SAAS Kit Pro',
-  description: 'The ultimate starter kit for your SAAS project',
+  title: 'ArchitectAI - Your Intelligent SAP Solution Design Partner',
+  description: 'Transform your SAP architecture process with AI-powered insights and recommendations. Get instant, contextually aware SAP BTP architecture recommendations.',
 }
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-primary text-secondary antialiased`} suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen bg-white text-gray-900 antialiased`} suppressHydrationWarning>
         {children}
       </body>
     </html>

@@ -18,67 +18,63 @@ import FeatureCard from './components/FeatureCard'
 
 const features = [
   {
-    icon: <CodeBracketIcon className="w-6 h-6" />,
-    title: 'Production-Ready Code',
-    description: 'Get started with professionally written, well-structured code that scales.',
+    icon: <CpuChipIcon className="w-6 h-6" />,
+    title: 'AI-Powered Architecture',
+    description: 'Leverage RAG-powered AI to streamline SAP architecture decisions.',
   },
   {
     icon: <RocketLaunchIcon className="w-6 h-6" />,
-    title: 'Quick Deployment',
-    description: 'Deploy your application with one click to your favorite cloud platform.',
+    title: 'Rapid Solution Design',
+    description: 'Get instant, contextually aware SAP BTP architecture recommendations.',
   },
   {
-    icon: <CpuChipIcon className="w-6 h-6" />,
-    title: 'AI Integration',
-    description: 'Built-in AI capabilities to supercharge your application features.',
+    icon: <BookOpenIcon className="w-6 h-6" />,
+    title: 'Best Practices',
+    description: 'Access curated SAP architecture patterns and best practices.',
   },
 ]
 
 const pricingPlans = [
   {
-    title: 'Starter',
-    price: '99',
-    description: 'Perfect for side projects and small startups',
+    title: 'Free Trial',
+    price: '0',
+    description: 'Perfect for exploring ArchitectAI capabilities',
     features: [
-      'Up to 5 team members',
-      'Basic analytics',
+      'Limited features',
+      '10 queries per month',
+      'Basic architecture recommendations',
       'Community support',
-      '5GB storage',
-      'API access',
-    ],
-    buttonText: 'Get Started',
-    priceId: 'price_1QTPalGI6vk81n8V8PtyW1ow'
-  },
-  {
-    title: 'Pro',
-    price: '249',
-    description: 'Best for growing businesses',
-    features: [
-      'Unlimited team members',
-      'Advanced analytics',
-      'Priority support',
-      '50GB storage',
-      'API access',
-      'Custom integrations',
     ],
     buttonText: 'Start Free Trial',
-    popular: true,
-    priceId: 'price_1QTPbgGI6vk81n8VgYFOi983'
+    priceId: 'price_1Qm627LqVp8miPvfxiCoHY4b'
+  },
+  {
+    title: 'Professional',
+    price: '299',
+    description: 'For professional SAP architects',
+    features: [
+      'Unlimited queries',
+      'Detailed architecture designs',
+      'Priority support',
+      'Export capabilities',
+      'Architecture history',
+    ],
+    buttonText: 'Get Started',
+    priceId: 'price_1Qm5yDLqVp8miPvflz7kx3jW'
   },
   {
     title: 'Enterprise',
-    price: '999',
-    description: 'For large scale applications',
+    price: 'Custom',
+    description: 'For organizations with complex needs',
     features: [
-      'Unlimited everything',
-      'White-label options',
-      '24/7 phone support',
-      '500GB storage',
-      'API access',
-      'Custom development',
+      'Unlimited queries',
+      'Priority support',
+      'Custom integrations',
+      'Dedicated account manager',
+      'Training and onboarding',
     ],
     buttonText: 'Contact Sales',
-    priceId: 'price_1QTPcUGI6vk81n8V9567pzL9'
+    priceId: 'price_enterprise'
   },
 ]
 
@@ -130,310 +126,130 @@ const testimonials = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-[#0A0A0A]/80 backdrop-blur-sm border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-white">
-                Startup
-              </Link>
-            </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/features" className="text-sm text-white/70 hover:text-white">
-                Features
-              </Link>
-              <Link href="/pricing" className="text-sm text-white/70 hover:text-white">
-                Pricing
-              </Link>
-              <Link href="/docs" className="text-sm text-white/70 hover:text-white flex items-center space-x-1">
-                <BookOpenIcon className="w-4 h-4" />
-                <span>Docs</span>
-              </Link>
-              <Link 
-                href="https://github.com/zainulabedeen123/best-saas-kit/discussions" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-sm text-white/70 hover:text-white"
+    <main className="flex min-h-screen flex-col">
+      {/* Hero Section */}
+      <section className="hero-section pt-32 pb-20 bg-gradient-to-r from-blue-50 to-white animate-fade-in">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">
+              ArchitectAI: Your Intelligent SAP Solution Design Partner
+            </h1>
+            <p className="text-xl text-gray-600 mb-8">
+              Transform your SAP architecture process with AI-powered insights and recommendations
+            </p>
+            <div className="flex justify-center gap-4">
+              <Link
+                href="/auth/sign-up"
+                className="btn-primary"
               >
-                Community
-              </Link>
-              <Link href="/blog" className="text-sm text-white/70 hover:text-white">
-                Blog
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="https://github.com/zainulabedeen123/best-saas-kit"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-white/70 hover:text-white flex items-center space-x-1"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" />
-                </svg>
-              </Link>
-              <Link 
-                href="/auth" 
-                className="text-sm text-white/70 hover:text-white"
-              >
-                Sign in
+                Start Free Trial
               </Link>
               <Link
-                href="/auth?view=sign-up"
-                className="bg-[#FFBE1A] text-black text-sm px-4 py-2 rounded-lg hover:bg-[#FFBE1A]/90"
+                href="#how-it-works"
+                className="bg-gray-100 text-gray-800 px-8 py-3 rounded-lg hover:bg-gray-200 transition-all duration-300 ease-in-out hover:-translate-y-1"
               >
-                Get Started
+                Learn More
               </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
-                <span className="mr-2">⚡</span> Ship faster with our SaaS Kit
-              </div>
-              <h1 className="text-5xl sm:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
-                Ship your startup<br />in days, not weeks
-              </h1>
-              <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                The fastest way to build and deploy your startup with production-ready code
-              </p>
-              <div className="flex items-center space-x-4 mb-8">
-                <div className="flex items-center bg-white/5 px-3 py-1 rounded-full">
-                  <div className="flex">
-                    {'★★★★★'.split('').map((star, i) => (
-                      <span key={i} className="text-[#FFBE1A]">
-                        {star}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="ml-2 text-[#FFBE1A] font-medium">4.9/5</span>
-                  <span className="mx-2 text-white/30">•</span>
-                  <span className="text-white/70">from 1000+ reviews</span>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/auth?view=sign-up"
-                  className="inline-flex justify-center items-center px-6 py-3 rounded-lg bg-[#FFBE1A] text-black font-medium hover:bg-[#FFBE1A]/90 transition-colors"
-                >
-                  Get Started
-                </Link>
-                <Link
-                  href="https://github.com/zainulabedeen123/best-saas-kit"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex justify-center items-center px-6 py-3 rounded-lg border border-white/10 text-white font-medium hover:bg-white/5 transition-colors"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" />
-                  </svg>
-                  Github Repo
-                </Link>
-              </div>
-            </div>
-            <div className="relative h-[400px] lg:h-[500px]">
-              <Image
-                src="/Saas-Header.png"
-                alt="SaaS Platform Preview"
-                fill
-                className="object-contain"
-                priority
-              />
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="space-y-16">
-            {/* Launch Time */}
-            <div className="text-[#4ADE80] text-sm font-mono">
-              const launch_time = "01:19 AM";
-            </div>
-
-            {/* Heading */}
-            <div>
-              <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white/90 to-white/60 bg-clip-text text-transparent">
-                Supercharge your app instantly,<br />
-                launch faster, make $
-              </h2>
-              <p className="text-lg text-white/60 max-w-3xl">
-                Login users, process payments and send emails at lightspeed. Spend your time building 
-                your startup, not integrating APIs. ShipFast provides you with the boilerplate code you 
-                need to launch, FAST.
-              </p>
-            </div>
-
-            {/* Feature Icons */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-8">
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-2xl">@</span>
-                </div>
-                <span className="text-white/60 text-sm">Emails</span>
-              </div>
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-2xl">💳</span>
-                </div>
-                <span className="text-white/60 text-sm">Payments</span>
-              </div>
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-2xl">👤</span>
-                </div>
-                <span className="text-white/60 text-sm">Login</span>
-              </div>
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-2xl">🗄️</span>
-                </div>
-                <span className="text-white/60 text-sm">Database</span>
-              </div>
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-2xl">📄</span>
-                </div>
-                <span className="text-white/60 text-sm">SEO</span>
-              </div>
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-2xl">🎨</span>
-                </div>
-                <span className="text-white/60 text-sm">Style</span>
-              </div>
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-2xl">⋯</span>
-                </div>
-                <span className="text-[#FFBE1A] text-sm">More</span>
-              </div>
-            </div>
-
-            {/* Feature List */}
-            <div className="space-y-4 text-lg">
-              <div className="flex items-center space-x-3">
-                <svg className="w-6 h-6 text-[#4ADE80]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-white/80">Tips to write copy that sells</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <svg className="w-6 h-6 text-[#4ADE80]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-white/80">Discord community to stay accountable</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <svg className="w-6 h-6 text-[#4ADE80]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-white/80">
-                  <span className="text-[#FFBE1A]">Crisp</span> customer support (auto show/hide, variables...)
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <svg className="w-6 h-6 text-[#4ADE80]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-white/80">Collect emails for a waitlist if your product isn't ready</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <svg className="w-6 h-6 text-[#4ADE80]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-white/80">Prompts to generate terms & privacy policy with ChatGPT</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <svg className="w-6 h-6 text-[#4ADE80]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-white/80">Copy paste code templates</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <svg className="w-6 h-6 text-[#4ADE80]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-white/80">Dead simple tutorials</span>
-              </div>
-            </div>
-
-            {/* Time Saved */}
-            <div className="text-[#4ADE80] text-lg">
-              Time saved: ∞ hours
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Time Breakdown Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-[#1A1311] rounded-3xl p-10 text-center">
-            <div className="space-y-3">
-              <div className="text-[#FF6B6B] font-medium">4 hrs <span className="text-white/60">to set up emails</span></div>
-              <div><span className="text-[#FF6B6B] font-medium">+ 6 hrs</span> <span className="text-white/60">designing a landing page</span></div>
-              <div><span className="text-[#FF6B6B] font-medium">+ 4 hrs</span> <span className="text-white/60">to handle Stripe webhooks</span></div>
-              <div><span className="text-[#FF6B6B] font-medium">+ 2 hrs</span> <span className="text-white/60">for SEO tags</span></div>
-              <div><span className="text-[#FF6B6B] font-medium">+ 1 hr</span> <span className="text-white/60">applying for Google Oauth</span></div>
-              <div><span className="text-[#FF6B6B] font-medium">+ 3 hrs</span> <span className="text-white/60">for DNS records</span></div>
-              <div><span className="text-[#FF6B6B] font-medium">+ 2 hrs</span> <span className="text-white/60">for protected API routes</span></div>
-              <div><span className="text-[#FF6B6B] font-medium">+ ∞ hrs</span> <span className="text-white/60">overthinking...</span></div>
-              <div className="pt-3 flex items-center justify-center gap-2">
-                <span className="text-[#FF6B6B] font-medium">= 22+ hours</span>
-                <span className="text-white/60">of headaches</span>
-                <span className="text-2xl">🌧️</span>
-              </div>
-            </div>
-          </div>
-          <div className="text-center mt-8">
-            <div className="inline-flex items-center text-white/60 gap-2">
-              <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-              There's an easier way
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Launch Announcement Video */}
-      <section className="py-20 px-4 bg-white/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-8">
-            Watch Our Launch Announcement
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Transform Your SAP Architecture Process
           </h2>
-          <div className="aspect-video w-full">
-            <iframe
-              className="w-full h-full rounded-2xl shadow-2xl"
-              src="https://www.youtube.com/embed/JiXy9JGkGzo"
-              title="Best SAAS Kit Pro Launch Announcement"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+          <div className="feature-grid grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="feature-card">
+                <div className="text-[#0052CC] mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
-
+      {/* How it works Section */}
+      <section id="how-it-works" className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+            <h2 className="text-3xl font-bold text-center mb-16">How ArchitectAI Works</h2>
+            <div className="max-w-4xl mx-auto">
+                <div className="flex flex-col md:flex-row gap-12 items-center">
+                    <div className="flex-1 text-center md:text-left">
+                        <div className="relative">
+                            <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+                                <span className="text-blue-600 font-bold">1</span>
+                            </div>
+                        </div>
+                        <h3 className="text-xl font-semibold mb-4">Describe Your Challenge</h3>
+                        <p className="text-gray-600">Describe your business challenge or objective to the AI agent</p>
+                    </div>
+                    <div className="flex-1 text-center md:text-left">
+                        <div className="relative">
+                            <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+                                <span className="text-blue-600 font-bold">2</span>
+                            </div>
+                        </div>
+                        <h3 className="text-xl font-semibold mb-4">Receive Recommendations</h3>
+                        <p className="text-gray-600">Receive tailored SAP BTP solution architecture recommendations and insights</p>
+                    </div>
+                    <div className="flex-1 text-center md:text-left">
+                        <div className="relative">
+                            <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+                                <span className="text-blue-600 font-bold">3</span>
+                            </div>
+                        </div>
+                        <h3 className="text-xl font-semibold mb-4">Implement Solutions</h3>
+                        <p className="text-gray-600">Implement the suggested solutions or consult further for detailed guidance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </section>      
       {/* Pricing Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Save hours of repetitive code,<br />ship fast, get profitable
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Simple, Transparent Pricing
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {pricingPlans.map((plan, index) => (
-              <PricingCard key={index} {...plan} />
+              <div key={index} className="feature-card text-center">
+                <h3 className="text-2xl font-bold mb-2">{plan.title}</h3>
+                <div className="text-4xl font-bold mb-2">
+                  {plan.price === 'Custom' ? (
+                    <span>Custom</span>
+                  ) : (
+                    <>
+                      <span>$</span>
+                      <span>{plan.price}</span>
+                      {plan.price !== '0' && <span className="text-lg">/mo</span>}
+                    </>
+                  )}
+                </div>
+                <p className="text-gray-600 mb-6">{plan.description}</p>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center justify-center text-gray-600">
+                      <svg className="w-5 h-5 text-[#0052CC] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={plan.title === 'Enterprise' ? '/contact' : '/auth/sign-up'}
+                  className="btn-primary block w-full text-center"
+                >
+                  {plan.buttonText}
+                </Link>
+              </div>
             ))}
           </div>
         </div>
@@ -443,10 +259,10 @@ export default function Home() {
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl font-bold text-black mb-4">
               Get in Touch
             </h2>
-            <p className="text-lg text-white/60 max-w-2xl mx-auto">
+            <p className="text-lg text-black/60 max-w-2xl mx-auto">
               Have questions about our product? Need help getting started? We're here to help.
             </p>
           </div>
@@ -455,8 +271,8 @@ export default function Home() {
             {/* Contact Information */}
             <div className="space-y-8">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4">Contact Information</h3>
-                <p className="text-white/60 mb-6">
+                <h3 className="text-xl font-semibold text-black mb-4">Contact Information</h3>
+                <p className="text-black/60 mb-6">
                   Fill out the form and we'll get back to you within 24 hours.
                 </p>
               </div>
@@ -467,8 +283,8 @@ export default function Home() {
                     <EnvelopeIcon className="w-6 h-6 text-[#FFBE1A]" />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium mb-1">Email</h4>
-                    <a href="mailto:contact@example.com" className="text-white/60 hover:text-[#FFBE1A]">
+                    <h4 className="text-black font-medium mb-1">Email</h4>
+                    <a href="mailto:contact@example.com" className="text-black/60 hover:text-[#FFBE1A]">
                       contact@example.com
                     </a>
                   </div>
@@ -479,8 +295,8 @@ export default function Home() {
                     <PhoneIcon className="w-6 h-6 text-[#FFBE1A]" />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium mb-1">Phone</h4>
-                    <a href="tel:+1234567890" className="text-white/60 hover:text-[#FFBE1A]">
+                    <h4 className="text-black font-medium mb-1">Phone</h4>
+                    <a href="tel:+1234567890" className="text-black/60 hover:text-[#FFBE1A]">
                       +1 (234) 567-890
                     </a>
                   </div>
@@ -491,8 +307,8 @@ export default function Home() {
                     <MapPinIcon className="w-6 h-6 text-[#FFBE1A]" />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium mb-1">Office</h4>
-                    <p className="text-white/60">
+                    <h4 className="text-black font-medium mb-1">Office</h4>
+                    <p className="text-black/60">
                       123 Innovation Street<br />
                       San Francisco, CA 94107
                     </p>
@@ -501,7 +317,7 @@ export default function Home() {
               </div>
 
               <div className="pt-8">
-                <h4 className="text-white font-medium mb-4">Follow Us</h4>
+                <h4 className="text-black font-medium mb-4">Follow Us</h4>
                 <div className="flex space-x-4">
                   <a href="#" className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
                     <svg className="w-5 h-5 text-[#FFBE1A]" fill="currentColor" viewBox="0 0 24 24">
@@ -515,7 +331,7 @@ export default function Home() {
                   </a>
                   <a href="#" className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
                     <svg className="w-5 h-5 text-[#FFBE1A]" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.548.223l.188-2.85 5.18-4.68c.223-.204-.054-.31-.346-.106l-6.4 4.02-2.76-.92c-.6-.183-.612-.6.125-.89l10.782-4.156c.5-.183.94.114.78.89z"/>
+                      <path d="M12 0C5.373 0 0 5.373 0 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" />
                     </svg>
                   </a>
                   <a href="#" className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
@@ -532,61 +348,61 @@ export default function Home() {
               <form className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="first_name" className="block text-sm font-medium text-white mb-2">
+                    <label htmlFor="first_name" className="block text-sm font-medium text-black mb-2">
                       First Name
                     </label>
                     <input
                       type="text"
                       id="first_name"
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-white placeholder-white/40"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
                       placeholder="John"
                     />
                   </div>
                   <div>
-                    <label htmlFor="last_name" className="block text-sm font-medium text-white mb-2">
+                    <label htmlFor="last_name" className="block text-sm font-medium text-black mb-2">
                       Last Name
                     </label>
                     <input
                       type="text"
                       id="last_name"
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-white placeholder-white/40"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
                       placeholder="Doe"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-black mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     id="email"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-white placeholder-white/40"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
                     placeholder="john@example.com"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-white mb-2">
+                  <label htmlFor="subject" className="block text-sm font-medium text-black mb-2">
                     Subject
                   </label>
                   <input
                     type="text"
                     id="subject"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-white placeholder-white/40"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
                     placeholder="How can we help?"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
+                  <label htmlFor="message" className="block text-sm font-medium text-black mb-2">
                     Message
                   </label>
                   <textarea
                     id="message"
                     rows={4}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-white placeholder-white/40"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
                     placeholder="Your message..."
                   ></textarea>
                 </div>
@@ -603,125 +419,76 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <FaqItem key={index} {...faq} />
-            ))}
+      {/* FQA Section */}
+      <section id="faq" className="py-20 bg-white">
+          <div className="container mx-auto px-6">
+              <h2 className="text-3xl font-bold text-center mb-16">Frequently Asked Questions</h2>
+              <div className="max-w-3xl mx-auto">
+                  <div className="space-y-6">
+                      <div className="bg-white p-6 rounded-lg shadow-md">
+                          <h3 className="text-lg font-semibold mb-2">How accurate are the AI agent's recommendations?</h3>
+                          <p className="text-gray-600">The AI is trained on extensive SAP documentation and real-world scenarios, providing highly accurate insights. However, we recommend validating critical decisions with SAP experts.</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-lg shadow-md">
+                          <h3 className="text-lg font-semibold mb-2">Can the AI agent replace human SAP Solution Architects?</h3>
+                          <p className="text-gray-600">While highly capable, the AI agent is designed to augment human expertise, not replace it. It's an invaluable tool for quick insights and initial designs.</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-lg shadow-md">
+                          <h3 className="text-lg font-semibold mb-2">How often is the AI agent's knowledge updated?</h3>
+                          <p className="text-gray-600">The AI agent is regularly updated with the latest SAP BTP developments and best practices to ensure current and relevant advice.</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-lg shadow-md">
+                          <h3 className="text-lg font-semibold mb-2">Is my company's data secure when using the AI agent?</h3>
+                          <p className="text-gray-600">We prioritize data security. All interactions are encrypted, and we do not store specific company information beyond the current session.</p>
+                      </div>
+                      <div className="bg-white p-6 rounded-lg shadow-md">
+                          <h3 className="text-lg font-semibold mb-2">Can the AI agent provide custom code or configurations?</h3>
+                          <p className="text-gray-600">The AI provides high-level architecture and integration recommendations. For specific code or detailed configurations, you may need to consult with SAP developers.</p>
+                      </div>
+                  </div>
+              </div>
           </div>
-        </div>
       </section>
-
       {/* Testimonials Section */}
-      <section className="py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-white mb-4">
-              5000+ makers built AI tools,<br />
-              SaaS, and more
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Testimonial 1 */}
-            <div className="bg-[#111111] rounded-xl p-6 border border-white/5">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-medium">
-                  SC
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-16">What Our Users Say</h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <div className="flex items-center mb-6">
+                <div className="flex-shrink-0">
+                  <img className="h-12 w-12 rounded-full" src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=0052CC&color=fff" alt="Sarah Johnson" />
                 </div>
-                <div>
-                  <h3 className="text-white font-medium">Sarah Chen</h3>
-                  <p className="text-sm text-white/60">CTO at TechStart</p>
+                <div className="ml-4">
+                  <h4 className="text-lg font-semibold">Sarah Johnson</h4>
+                  <p className="text-gray-600">CTO of TechInnovate Inc.</p>
                 </div>
               </div>
-              <p className="text-white/80 mb-6">
-                This toolkit saved us months of development time. We launched our MVP in just 2 weeks!
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-2xl font-bold text-white">3 months</div>
-                  <div className="text-sm text-white/60">Time Saved</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-[#4ADE80]">300%</div>
-                  <div className="text-sm text-white/60">ROI</div>
-                </div>
-              </div>
+              <p className="text-gray-600">"As an ex-SAP Solution Architect, I'm amazed at how accurately this AI agent captures the nuances of SAP BTP architecture. It's like having an experienced colleague available 24/7."</p>
             </div>
-
-            {/* Testimonial 2 */}
-            <div className="bg-[#111111] rounded-xl p-6 border border-white/5">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-medium">
-                  MJ
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <div className="flex items-center mb-6">
+                <div className="flex-shrink-0">
+                  <img className="h-12 w-12 rounded-full" src="https://ui-avatars.com/api/?name=Michael+Chen&background=0052CC&color=fff" alt="Michael Chen" />
                 </div>
-                <div>
-                  <h3 className="text-white font-medium">Mike Johnson</h3>
-                  <p className="text-sm text-white/60">Lead Developer</p>
+                <div className="ml-4">
+                  <h4 className="text-lg font-semibold">Michael Chen</h4>
+                  <p className="text-gray-600">Lead Architect at GlobalSolutions Corp.</p>
                 </div>
               </div>
-              <p className="text-white/80 mb-6">
-                The code quality is exceptional. It's like having a senior developer on the team.
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-2xl font-bold text-white">50+</div>
-                  <div className="text-sm text-white/60">Components</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-[#4ADE80]">100%</div>
-                  <div className="text-sm text-white/60">TypeScript</div>
-                </div>
-              </div>
+              <p className="text-gray-600">"The AI agent's ability to quickly provide SAP BTP integration strategies saved us months of planning. It's an invaluable tool for any SAP professional."</p>
             </div>
-
-            {/* Testimonial 3 */}
-            <div className="bg-[#111111] rounded-xl p-6 border border-white/5">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-medium">
-                  LP
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <div className="flex items-center mb-6">
+                <div className="flex-shrink-0">
+                  <img className="h-12 w-12 rounded-full" src="https://ui-avatars.com/api/?name=Emma+Rodriguez&background=0052CC&color=fff" alt="Emma Rodriguez" />
                 </div>
-                <div>
-                  <h3 className="text-white font-medium">Lisa Park</h3>
-                  <p className="text-sm text-white/60">Founder at AppLabs</p>
+                <div className="ml-4">
+                  <h4 className="text-lg font-semibold">Emma Rodriguez</h4>
+                  <p className="text-gray-600">SAP Practice Lead at ConsultEx</p>
                 </div>
               </div>
-              <p className="text-white/80 mb-6">
-                Best investment we made for our startup. The support is amazing too!
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-2xl font-bold text-white">24/7</div>
-                  <div className="text-sm text-white/60">Support</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-[#4ADE80]">95%</div>
-                  <div className="text-sm text-white/60">Satisfaction</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Social Proof */}
-          <div className="mt-16 text-center">
-            <div className="inline-flex items-center bg-white/5 px-4 py-2 rounded-full">
-              <div className="flex -space-x-2 mr-3">
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full border-2 border-[#111111] bg-gradient-to-br from-purple-500 to-pink-500"
-                    style={{ transform: `translateX(${i * -4}px)` }}
-                  />
-                ))}
-              </div>
-              <div className="text-white/60 text-sm">
-                Join <span className="text-white font-medium">5,000+</span> makers
-              </div>
+              <p className="text-gray-600">"I was skeptical at first, but the depth of knowledge this AI agent possesses about SAP BTP is truly impressive. It's become an essential part of our solution design process."</p>
             </div>
           </div>
         </div>
@@ -732,51 +499,51 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="font-semibold text-white mb-4">Product</h3>
+              <h3 className="font-semibold text-black mb-4">Product</h3>
               <ul className="space-y-2">
-                <li><Link href="/features" className="text-white/70 hover:text-white">Features</Link></li>
-                <li><Link href="/pricing" className="text-white/70 hover:text-white">Pricing</Link></li>
-                <li><Link href="/docs" className="text-white/70 hover:text-white">Documentation</Link></li>
-                <li><Link href="/changelog" className="text-white/70 hover:text-white">Changelog</Link></li>
+                <li><Link href="/features" className="text-black/70 hover:text-black">Features</Link></li>
+                <li><Link href="/pricing" className="text-black/70 hover:text-black">Pricing</Link></li>
+                <li><Link href="/docs" className="text-black/70 hover:text-black">Documentation</Link></li>
+                <li><Link href="/changelog" className="text-black/70 hover:text-black">Changelog</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-white mb-4">Company</h3>
+              <h3 className="font-semibold text-black mb-4">Company</h3>
               <ul className="space-y-2">
-                <li><Link href="/about" className="text-white/70 hover:text-white">About</Link></li>
-                <li><Link href="/blog" className="text-white/70 hover:text-white">Blog</Link></li>
-                <li><Link href="/careers" className="text-white/70 hover:text-white">Careers</Link></li>
-                <li><Link href="/contact" className="text-white/70 hover:text-white">Contact</Link></li>
+                <li><Link href="/about" className="text-black/70 hover:text-black">About</Link></li>
+                <li><Link href="/blog" className="text-black/70 hover:text-black">Blog</Link></li>
+                <li><Link href="/careers" className="text-black/70 hover:text-black">Careers</Link></li>
+                <li><Link href="/contact" className="text-black/70 hover:text-black">Contact</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-white mb-4">Resources</h3>
+              <h3 className="font-semibold text-black mb-4">Resources</h3>
               <ul className="space-y-2">
                 <li><Link 
                   href="https://github.com/zainulabedeen123/best-saas-kit/discussions" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="text-white/70 hover:text-white"
+                  className="text-black/70 hover:text-black"
                 >
                   Community
                 </Link></li>
-                <li><Link href="/help" className="text-white/70 hover:text-white">Help Center</Link></li>
-                <li><Link href="/status" className="text-white/70 hover:text-white">Status</Link></li>
-                <li><Link href="/terms" className="text-white/70 hover:text-white">Terms of Service</Link></li>
+                <li><Link href="/help" className="text-black/70 hover:text-black">Help Center</Link></li>
+                <li><Link href="/status" className="text-black/70 hover:text-black">Status</Link></li>
+                <li><Link href="/terms" className="text-black/70 hover:text-black">Terms of Service</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-white mb-4">Connect</h3>
+              <h3 className="font-semibold text-black mb-4">Connect</h3>
               <ul className="space-y-2">
-                <li><Link href="https://twitter.com" className="text-white/70 hover:text-white">Twitter</Link></li>
-                <li><Link href="https://github.com/zainulabedeen123/best-saas-kit" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-white">GitHub</Link></li>
-                <li><Link href="https://discord.com" className="text-white/70 hover:text-white">Discord</Link></li>
-                <li><Link href="/newsletter" className="text-white/70 hover:text-white">Newsletter</Link></li>
+                <li><Link href="https://twitter.com" className="text-black/70 hover:text-black">Twitter</Link></li>
+                <li><Link href="https://github.com/zainulabedeen123/best-saas-kit" target="_blank" rel="noopener noreferrer" className="text-black/70 hover:text-black">GitHub</Link></li>
+                <li><Link href="https://discord.com" className="text-black/70 hover:text-black">Discord</Link></li>
+                <li><Link href="/newsletter" className="text-black/70 hover:text-black">Newsletter</Link></li>
               </ul>
             </div>
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   )
 }

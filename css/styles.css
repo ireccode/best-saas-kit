@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Custom animations and transitions */
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -17,37 +13,50 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Custom styles for the chat widget */
+.chat-widget {
+    transition: transform 0.3s ease;
+}
+
+.chat-widget:hover {
+    transform: scale(1.02);
+}
+
 /* Custom button styles */
 .btn-primary {
-    @apply bg-gradient-to-r from-[#0052CC] to-[#0066FF] text-white px-8 py-3 rounded-lg transition-all duration-300 ease-in-out;
+    background: linear-gradient(45deg, #0052CC, #0066FF);
+    transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    @apply transform -translate-y-1 shadow-lg;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Custom card hover effects */
 .feature-card {
-    @apply bg-white p-8 rounded-lg shadow-lg transition-all duration-300 ease-in-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .feature-card:hover {
-    @apply transform -translate-y-2 shadow-xl;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Custom form styles */
 .form-input:focus {
-    @apply border-[#0052CC] ring-2 ring-[#0052CC] ring-opacity-10;
+    border-color: #0052CC;
+    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
 }
 
 /* Mobile responsiveness adjustments */
 @media (max-width: 768px) {
     .hero-section {
-        @apply pt-24;
+        padding-top: 6rem;
     }
     
     .feature-grid {
-        @apply grid-cols-1;
+        grid-template-columns: 1fr;
     }
 }
 
@@ -60,36 +69,20 @@ html {
     animation: spin 1s linear infinite;
 }
 
-:root {
-  --background:#FFFFFF;
-  --foreground:#0A0A0A;
-}
-
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-@layer base {
-  h1, h2, h3, h4, h5, h6 {
-    color: var(--foreground);
-    font-weight: bold;
-  }
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    @apply bg-gray-100;
+    background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply bg-[#0052CC] rounded;
+    background: #0052CC;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    @apply bg-[#003d99];
+    background: #003d99;
 }

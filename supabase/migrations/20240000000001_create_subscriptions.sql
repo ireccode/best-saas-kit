@@ -65,3 +65,8 @@ INSERT INTO subscription_plans (name, description, price_id, amount, interval, f
 ('Starter', 'Perfect for side projects and small startups', 'price_starter', 99.00, 'month', '["Up to 5 team members", "Basic analytics", "Community support", "5GB storage", "API access"]'),
 ('Pro', 'Best for growing businesses', 'price_pro', 249.00, 'month', '["Unlimited team members", "Advanced analytics", "Priority support", "50GB storage", "API access", "Custom integrations"]'),
 ('Enterprise', 'For large scale applications', 'price_enterprise', 999.00, 'month', '["Unlimited everything", "White-label options", "24/7 phone support", "500GB storage", "API access", "Custom development"]'); 
+
+-- Insert ArchitectAI default plans
+INSERT INTO subscription_plans (name, description, price_id, currency, amount, interval, features, active) VALUES
+('Professional', 'For professional SAP architects', 'price_1Qm5yDLqVp8miPvflz7kx3jW', 'aud', 299.00, 'month', '["Unlimited queries", "Detailed architecture designs", "Priority support", "Export capabilities", "Architecture history"]', true);
+

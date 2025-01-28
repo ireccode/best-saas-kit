@@ -34,15 +34,21 @@ export default function Header() {
 
         const { data: userData } = await supabase
           .from('users')
-          .select('id, email, credits')
+          .select('id, email')
           .eq('id', session.user.id)
           .single()
 
-        if (userData) {
+        const { data: creditsData } = await supabase
+          .from('user_credits')
+          .select('credits')
+          .eq('user_id', session.user.id)
+          .single()
+
+        if (userData && creditsData) {
           setUser({
             id: userData.id,
             email: session.user.email || userData.email,
-            credits: userData.credits
+            credits: creditsData.credits
           })
         }
       } catch (error) {
@@ -55,19 +61,26 @@ export default function Header() {
 
     fetchUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Subscribe to auth changes
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
         const { data: userData } = await supabase
           .from('users')
-          .select('id, email, credits')
+          .select('id, email')
           .eq('id', session.user.id)
           .single()
 
-        if (userData) {
+        const { data: creditsData } = await supabase
+          .from('user_credits')
+          .select('credits')
+          .eq('user_id', session.user.id)
+          .single()
+
+        if (userData && creditsData) {
           setUser({
             id: userData.id,
             email: session.user.email || userData.email,
-            credits: userData.credits
+            credits: creditsData.credits
           })
         }
       } else {
@@ -76,10 +89,33 @@ export default function Header() {
       }
     })
 
+    // Subscribe to credits changes
+    const creditsSubscription = supabase
+      .channel('credits_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_credits',
+          filter: user ? `user_id=eq.${user.id}` : undefined
+        },
+        async (payload) => {
+          if (payload.new && user) {
+            setUser({
+              ...user,
+              credits: payload.new.credits
+            })
+          }
+        }
+      )
+      .subscribe()
+
     return () => {
-      subscription.unsubscribe()
+      authSubscription.unsubscribe()
+      creditsSubscription.unsubscribe()
     }
-  }, [supabase, router])
+  }, [supabase, router, user])
 
   const handleSignOut = async () => {
     try {

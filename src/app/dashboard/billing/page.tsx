@@ -16,52 +16,52 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 // Define pricing plans
 const pricingPlans = [
   {
-    title: 'Starter',
-    price: '99',
-    description: 'Perfect for side projects and small startups',
+    title: 'Free Trial',
+    price: '0',
+    description: 'Perfect for exploring ArchitectAI capabilities',
     features: [
-      'Up to 5 team members',
-      'Basic analytics',
+      'Limited features',
+      '10 queries per month',
+      'Basic architecture recommendations',
       'Community support',
-      '5GB storage',
-      'API access',
     ],
-    priceId: 'price_1QTPalGI6vk81n8V8PtyW1ow'
+    buttonText: 'Start Free Trial',
+    priceId: 'price_1Qm627LqVp8miPvfxiCoHY4b'
   },
   {
-    title: 'Pro',
-    price: '249',
-    description: 'Best for growing businesses',
+    title: 'Professional',
+    price: '299',
+    description: 'For professional SAP architects',
     features: [
-      'Unlimited team members',
-      'Advanced analytics',
+      'Unlimited queries',
+      'Detailed architecture designs',
       'Priority support',
-      '50GB storage',
-      'API access',
-      'Custom integrations',
+      'Export capabilities',
+      'Architecture history',
     ],
-    popular: true,
-    priceId: 'price_1QTPbgGI6vk81n8VgYFOi983'
+    buttonText: 'Get Started',
+    priceId: 'price_1Qm5yDLqVp8miPvflz7kx3jW'
   },
   {
     title: 'Enterprise',
-    price: '999',
-    description: 'For large scale applications',
+    price: 'Custom',
+    description: 'For organizations with complex needs',
     features: [
-      'Unlimited everything',
-      'White-label options',
-      '24/7 phone support',
-      '500GB storage',
-      'API access',
-      'Custom development',
+      'Unlimited queries',
+      'Priority support',
+      'Custom integrations',
+      'Dedicated account manager',
+      'Training and onboarding',
     ],
-    priceId: 'price_1QTPcUGI6vk81n8V9567pzL9'
+    buttonText: 'Contact Sales',
+    priceId: 'price_enterprise'
   },
 ]
 
 interface Subscription {
   id: string
-  plan_id: string
+  subscription_id: string
+  price_id: string
   status: string
   current_period_end: string
   cancel_at_period_end: boolean
@@ -110,19 +110,23 @@ export default function BillingPage() {
     try {
       // Fetch current subscription
       const { data: subscription, error: subError } = await supabase
-        .from('subscriptions')
+        .from('customer_subscriptions')
         .select('*')
         .eq('user_id', userId)
         .eq('status', 'active')
         .maybeSingle()
 
       if (subError) {
-        console.error('Error fetching subscription:', subError)
-        // Don't set error for no subscription found
+        // Only log real errors, not "no rows returned"
         if (subError.code !== 'PGRST116') {
+          console.error('Error fetching subscription:', subError)
           setError('Error loading subscription data')
+        } else {
+          // No active subscription found - this is normal for new users
+          console.log('No active subscription found')
+          setCurrentSubscription(null)
         }
-      } else if (subscription) {
+      } else {
         setCurrentSubscription(subscription)
       }
 
@@ -135,10 +139,13 @@ export default function BillingPage() {
         .limit(10)
 
       if (historyError) {
-        console.error('Error fetching billing history:', historyError)
-        // Don't set error for no history found
+        // Only log real errors, not "no rows returned"
         if (historyError.code !== 'PGRST116') {
+          console.error('Error fetching billing history:', historyError)
           setError('Error loading billing history')
+        } else {
+          console.log('No billing history found')
+          setBillingHistory([])
         }
       } else {
         setBillingHistory(history || [])
@@ -250,10 +257,10 @@ export default function BillingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-white">
-                  {pricingPlans.find(plan => plan.priceId === currentSubscription.plan_id)?.title || 'Unknown Plan'}
+                  {pricingPlans.find(plan => plan.priceId === currentSubscription.price_id)?.title || 'Unknown Plan'}
                 </h3>
                 <p className="text-white/60">
-                  ${pricingPlans.find(plan => plan.priceId === currentSubscription.plan_id)?.price || '0'}/month
+                  ${pricingPlans.find(plan => plan.priceId === currentSubscription.price_id)?.price || '0'}/month
                 </p>
               </div>
               {currentSubscription.cancel_at_period_end ? (
@@ -290,7 +297,7 @@ export default function BillingPage() {
       {/* Available Plans */}
       <div className="bg-[#111111] rounded-2xl p-8 border border-white/5">
         <h2 className="text-xl font-semibold text-white mb-6">Available Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-yellow-500">
           {pricingPlans.map((plan) => (
             <div
               key={plan.priceId}
@@ -300,7 +307,7 @@ export default function BillingPage() {
                   : 'bg-gray-800/50 border border-gray-700'
               }`}
             >
-              <h3 className="text-xl font-semibold mb-4">{plan.title}</h3>
+              <h3 className="text-xl font-semibold mb-4 text-white">{plan.title}</h3>
               <div className="mb-4">
                 <span className="text-4xl font-bold">${plan.price}</span>
                 <span className="text-gray-400 ml-2">/month</span>
@@ -316,14 +323,14 @@ export default function BillingPage() {
               </ul>
               <button
                 onClick={() => handleSubscribe(plan.priceId)}
-                disabled={currentSubscription?.plan_id === plan.priceId}
+                disabled={currentSubscription?.price_id === plan.priceId}
                 className={`w-full text-center py-3 px-6 rounded-lg transition-colors ${
                   plan.popular
                     ? 'bg-green-500 hover:bg-green-600 text-black'
                     : 'bg-white hover:bg-gray-200 text-black'
                 } disabled:opacity-50`}
               >
-                {currentSubscription?.plan_id === plan.priceId ? 'Current Plan' : 'Subscribe'}
+                {currentSubscription?.price_id === plan.priceId ? 'Current Plan' : 'Subscribe'}
               </button>
             </div>
           ))}
