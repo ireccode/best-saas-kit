@@ -93,3 +93,44 @@ Design Requirements
 - Implement error handling for payment processing functions
 
 Please maintain code quality standards and add comprehensive error handling for both AI and payment processing functions.
+
+5 Implement Integration AI Chat with n8n AI agent RAG workflow and webhook URL https://smartechall.app.n8n.cloud/webhook-test/8982df3e-aa27-4489-ad0f-f62c65e25abe 
+For your use case (only users with credits > 0 can trigger n8n workflows), the optimal authentication strategy combines JWT (JSON Web Tokens) for secure identity verification and custom logic in n8n to validate user credits. Here’s why and how to implement it:
+
+Security:
+Tokens are signed, preventing tampering.
+Supports expiration times to limit token validity.
+
+Stateless:
+No need for n8n to query your database for every request (credits can be embedded in the token payload).
+
+Scalability:
+Works seamlessly with Next.js and n8n’s HTTP node.
+
+Implementation Steps
+1. Next.js: Generate JWT with Credit Data
+When a user with credits > 0 sends a request, generate a JWT containing:
+
+//json
+
+{
+  "userId": "123",
+  "credits": 5,
+  "exp": 1672480800 // Token expiration (short-lived, e.g., 5 minutes)
+}
+
+Code Example (Next.js API route):
+
+//typescript
+
+import jwt from 'jsonwebtoken';
+
+export default async function generateToken(user) {
+  if (user.credits <= 0) throw new Error('Insufficient credits');
+  
+  return jwt.sign(
+    { userId: user.id, credits: user.credits },
+    process.env.JWT_SECRET!,
+    { expiresIn: '5m' }
+  );
+}
