@@ -2,15 +2,38 @@
 
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import Chat from '@/components/dashboard/Chat'
+import Chat from '@/components/chat/Chat'
 
 export default function Dashboard() {
   const [profile, setProfile] = useState<any>(null)
   const supabase = createClientComponentClient()
 
   useEffect(() => {
-    fetchProfile()
-  }, [fetchProfile])
+    const controller = new AbortController()
+
+    const fetchProfileData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user && !controller.signal.aborted) {
+          const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single()
+          
+          if (data && !controller.signal.aborted) {
+            setProfile(data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+      }
+    }
+
+    fetchProfileData()
+
+    return () => controller.abort()
+  }, [supabase.auth])
 
   async function fetchProfile() {
     try {
@@ -48,16 +71,20 @@ export default function Dashboard() {
           </h2>
           <p className="text-white/60 mb-4">
             This is your AI-powered SAAS starter kit. You can use the chat interface
-            to interact with GPT-4 and build amazing AI applications.
+            to interact with AI and analyze files.
           </p>
           <ul className="space-y-2 text-white/60">
             <li className="flex items-center">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-              Each message costs 1 credit
+              Each chat message costs 1 credit
             </li>
             <li className="flex items-center">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-              Responses are powered by GPT-4
+              File analysis costs 2 credits
+            </li>
+            <li className="flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+              Supports common document formats up to 10MB
             </li>
             <li className="flex items-center">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />

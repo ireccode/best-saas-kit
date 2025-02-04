@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import ContactForm from '@/components/contact/ContactForm'
 import {
   CodeBracketIcon,
   RocketLaunchIcon,
@@ -125,6 +126,7 @@ const testimonials = [
 ]
 
 export default function Home() {
+
   return (
     <main className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -139,7 +141,7 @@ export default function Home() {
             </p>
             <div className="flex justify-center gap-4">
               <Link
-                href="/auth/sign-up"
+                href="/auth?view=sign-up"
                 className="btn-primary"
               >
                 Start Free Trial
@@ -244,7 +246,7 @@ export default function Home() {
                   ))}
                 </ul>
                 <Link
-                  href={plan.title === 'Enterprise' ? '/contact' : '/auth/sign-up'}
+                  href={plan.title === 'Enterprise' ? '/contact' : `/auth?view=sign-up&plan=${plan.priceId}`}
                   className="btn-primary block w-full text-center"
                 >
                   {plan.buttonText}
@@ -284,8 +286,8 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="text-black font-medium mb-1">Email</h4>
-                    <a href="mailto:contact@example.com" className="text-black/60 hover:text-[#FFBE1A]">
-                      contact@example.com
+                    <a href="mailto:info@smartechall.com" className="text-black/60 hover:text-[#FFBE1A]">
+                      info@smartechall.com
                     </a>
                   </div>
                 </div>
@@ -344,77 +346,12 @@ export default function Home() {
             </div>
 
             {/* Contact Form */}
-            <div className="bg-white/[0.02] rounded-2xl p-8 border border-white/5">
-              <form className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="first_name" className="block text-sm font-medium text-black mb-2">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      id="first_name"
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
-                      placeholder="John"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="last_name" className="block text-sm font-medium text-black mb-2">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      id="last_name"
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
-                      placeholder="Doe"
-                    />
-                  </div>
-                </div>
+            <ContactForm />
 
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-black mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
-                    placeholder="john@example.com"
-                  />
-                </div>
 
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-black mb-2">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    id="subject"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
-                    placeholder="How can we help?"
-                  />
-                </div>
 
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-black mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    rows={4}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FFBE1A]/50 focus:border-[#FFBE1A] text-black placeholder-white/40"
-                    placeholder="Your message..."
-                  ></textarea>
-                </div>
 
-                <button
-                  type="submit"
-                  className="w-full px-6 py-3 bg-[#FFBE1A] text-black font-medium rounded-lg hover:bg-[#FFBE1A]/90 transition-colors"
-                >
-                  Send Message
-                </button>
-              </form>
-            </div>
+
           </div>
         </div>
       </section>

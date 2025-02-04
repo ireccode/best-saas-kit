@@ -22,100 +22,115 @@ export default function Header() {
   const router = useRouter()
 
   useEffect(() => {
-    const fetchUser = async () => {
+    let mounted = true
+    let authSubscription: any = null
+    let creditsSubscription: any = null
+
+    const fetchUserData = async (sessionUserId: string) => {
+      if (!mounted) return
+
+      try {
+        // First get the user profile
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('id, email')
+          .eq('id', sessionUserId)
+          .single()
+
+        if (userError) throw userError
+
+        // Then get the credits
+        const { data: creditsData, error: creditsError } = await supabase
+          .from('user_credits')
+          .select('credits')
+          .eq('user_id', sessionUserId)
+          .single()
+
+        if (creditsError && creditsError.code !== 'PGRST116') { // Ignore not found error
+          throw creditsError
+        }
+
+        if (userData && mounted) {
+          setUser({
+            id: userData.id,
+            email: userData.email,
+            credits: creditsData?.credits ?? 0
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+        if (mounted) setError('Error loading user data')
+      } finally {
+        if (mounted) setIsLoading(false)
+      }
+    }
+
+    const setupSubscriptions = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         
-        if (!session) {
+        if (!session || !mounted) {
           setUser(null)
           setIsLoading(false)
           return
         }
 
-        const { data: userData } = await supabase
-          .from('users')
-          .select('id, email')
-          .eq('id', session.user.id)
-          .single()
+        // Initial data fetch
+        await fetchUserData(session.user.id)
 
-        const { data: creditsData } = await supabase
-          .from('user_credits')
-          .select('credits')
-          .eq('user_id', session.user.id)
-          .single()
+        // Setup auth subscription
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (_event, session) => {
+            if (!mounted) return
 
-        if (userData && creditsData) {
-          setUser({
-            id: userData.id,
-            email: session.user.email || userData.email,
-            credits: creditsData.credits
-          })
+            if (!session) {
+              setUser(null)
+              router.replace('/auth')
+              return
+            }
+
+            await fetchUserData(session.user.id)
+          }
+        )
+
+        authSubscription = subscription
+
+        // Setup credits subscription only if we have a user
+        if (session.user.id) {
+          creditsSubscription = supabase
+            .channel(`credits_changes_${session.user.id}`)
+            .on(
+              'postgres_changes',
+              {
+                event: '*',
+                schema: 'public',
+                table: 'user_credits',
+                filter: `user_id=eq.${session.user.id}`
+              },
+              (payload) => {
+                if (!mounted || !payload.new) return
+                setUser(prev => prev ? {
+                  ...prev,
+                  credits: payload.new.credits
+                } : null)
+              }
+            )
+            .subscribe()
         }
       } catch (error) {
-        console.error('Error:', error)
-        setError('Error loading user data')
-      } finally {
-        setIsLoading(false)
+        console.error('Error setting up subscriptions:', error)
+        if (mounted) setError('Error initializing')
       }
     }
 
-    fetchUser()
-
-    // Subscribe to auth changes
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('id, email')
-          .eq('id', session.user.id)
-          .single()
-
-        const { data: creditsData } = await supabase
-          .from('user_credits')
-          .select('credits')
-          .eq('user_id', session.user.id)
-          .single()
-
-        if (userData && creditsData) {
-          setUser({
-            id: userData.id,
-            email: session.user.email || userData.email,
-            credits: creditsData.credits
-          })
-        }
-      } else {
-        setUser(null)
-        router.replace('/auth')
-      }
-    })
-
-    // Subscribe to credits changes
-    const creditsSubscription = supabase
-      .channel('credits_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'user_credits',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        },
-        async (payload) => {
-          if (payload.new && user) {
-            setUser({
-              ...user,
-              credits: payload.new.credits
-            })
-          }
-        }
-      )
-      .subscribe()
+    setupSubscriptions()
 
     return () => {
-      authSubscription.unsubscribe()
-      creditsSubscription.unsubscribe()
+      mounted = false
+      if (authSubscription) authSubscription.unsubscribe()
+      if (creditsSubscription) creditsSubscription.unsubscribe()
     }
-  }, [supabase, router, user])
+  }, [supabase, router])
 
   const handleSignOut = async () => {
     try {
