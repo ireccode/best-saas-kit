@@ -264,7 +264,7 @@ export default function BillingPage() {
                 </p>
               </div>
               {currentSubscription.cancel_at_period_end ? (
-                <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 rounded-full text-sm">
+                <span className="px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-sm">
                   Cancels at period end
                 </span>
               ) : (
@@ -297,7 +297,7 @@ export default function BillingPage() {
       {/* Available Plans */}
       <div className="bg-[#111111] rounded-2xl p-8 border border-white/5">
         <h2 className="text-xl font-semibold text-white mb-6">Available Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-yellow-500">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-green-500">
           {pricingPlans.map((plan) => (
             <div
               key={plan.priceId}

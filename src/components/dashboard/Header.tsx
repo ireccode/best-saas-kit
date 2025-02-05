@@ -5,6 +5,8 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Database } from '@/types/supabase'
+import Image from 'next/image';
+import ThemeSwitch from './ThemeSwitch';
 
 interface User {
   id: string
@@ -160,9 +162,19 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-white font-bold text-xl">
-              SAAS Kit
-            </Link>
+          {/* Logo and Brand Name */}
+          <Link href="/" className="flex items-center space-x-3">
+            <Image
+              src="/images/logo.svg"
+              alt="AI Assistant 4 Architect Logo"
+              width={32}
+              height={32}
+              className="h-8 w-auto dark:invert"
+            />
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">
+              AI Assistant 4 Architect
+            </span>
+          </Link>
           </div>
 
           <div className="flex items-center space-x-4">

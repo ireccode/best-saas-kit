@@ -45,11 +45,19 @@ function AuthContent() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A] border-b border-white/10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
-              <Image src="/logo.svg" alt="Logo" width={32} height={32} priority />
-              <span className="text-white font-bold text-xl">SaaS Kit Pro</span>
-            </Link>
+          {/* Logo and Brand Name */}
+          <Link href="/" className="flex items-center space-x-3">
+            <Image
+              src="/images/logo.svg"
+              alt="AI Assistant 4 Architect Logo"
+              width={32}
+              height={32}
+              className="h-8 w-auto dark:invert"
+            />
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">
+              AI Assistant 4 Architect
+            </span>
+          </Link>
 
             {/* Navigation */}
             <nav className="flex items-center space-x-6">
