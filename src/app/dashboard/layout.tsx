@@ -10,6 +10,9 @@ import {
   UserCircleIcon,
   DocumentTextIcon,
   Cog6ToothIcon,
+  CreditCardIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline'
 import Header from '@/components/dashboard/Header'
 
@@ -22,8 +25,9 @@ interface NavItem {
 const navigation: NavItem[] = [
   { name: 'Overview', href: '/dashboard', icon: HomeIcon },
   { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
-  { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },
   { name: 'Documents', href: '/dashboard/documents', icon: DocumentTextIcon },
+  { name: 'Get credits', href: '/dashboard/billing', icon: CreditCardIcon },
+  { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },
   { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
 ]
 
@@ -34,6 +38,7 @@ export default function DashboardLayout({
 }) {
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClientComponentClient()
@@ -90,8 +95,20 @@ export default function DashboardLayout({
       
       <div className="flex h-[calc(100vh-4rem)] pt-16">
         {/* Sidebar */}
-        <div className="fixed left-0 w-64 h-[calc(100vh-4rem)] bg-[#111111] border-r border-white/5 overflow-y-auto">
-          <nav className="p-4 space-y-1">
+        <div className={`fixed left-0 h-[calc(100vh-4rem)] bg-[#111111] border-r border-white/5 overflow-y-auto transition-all duration-300 ${isExpanded ? 'w-64' : 'w-16'}`}>
+          <nav className="p-4 space-y-1 relative">
+            {/* Toggle Button */}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="absolute -right-3 top-2 bg-[#111111] p-1 rounded-full border border-white/5 cursor-pointer hover:bg-white/5"
+            >
+              {isExpanded ? (
+                <ChevronLeftIcon className="w-6 h-6 text-white/60" />
+              ) : (
+                <ChevronRightIcon className="w-6 h-6 text-white/60" />
+              )}
+            </button>
+            
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -105,9 +122,10 @@ export default function DashboardLayout({
                       : 'text-white/60 hover:bg-white/5 hover:text-white'
                     }
                   `}
+                  title={!isExpanded ? item.name : ''}
                 >
-                  <item.icon className="w-5 h-5 mr-3" />
-                  {item.name}
+                  <item.icon className="w-5 h-5 min-w-[1.25rem]" />
+                  {isExpanded && <span className="ml-3">{item.name}</span>}
                 </Link>
               )
             })}
@@ -115,7 +133,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Main Content */}
-        <div className="ml-64 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className={`transition-all duration-300 ${isExpanded ? 'ml-64' : 'ml-16'} flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8`}>
           {children}
         </div>
       </div>
