@@ -1,12 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Chat from '@/components/chat/Chat'
+import { OpenWebUIButton } from '@/components/OpenWebUIButton';
 
 export default function Dashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [profile, setProfile] = useState<any>(null)
   const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -50,6 +61,14 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error fetching profile:', error)
     }
+  }
+
+  if (status === 'loading') {
+    return <div>Loading...</div>
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
@@ -125,13 +144,13 @@ export default function Dashboard() {
               <h3 className="font-medium text-white">Analytics</h3>
               <p className="text-sm text-white/60">View your usage</p>
             </button>
-            <button
-              onClick={() => window.location.href = '/docs'}
-              className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors text-left"
-            >
-              <h3 className="font-medium text-white">Documentation</h3>
-              <p className="text-sm text-white/60">Learn how to build</p>
-            </button>
+            <div className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors text-left">
+              <h3 className="font-medium text-white">Open-WebUI extension</h3>
+              <p className="text-sm text-white/60">Click to open</p>
+              <div>
+                <OpenWebUIButton />
+              </div>
+            </div>
           </div>
         </div>
       </div>

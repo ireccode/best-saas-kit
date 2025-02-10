@@ -1,147 +1,222 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { Database } from '@/types/supabase'
 
 interface AuthFormProps {
   view?: string
+  onAuthSuccess?: (email: string, password: string) => void
 }
 
-export default function AuthForm({ view: initialView }: AuthFormProps) {
+export default function AuthForm({ view: initialView, onAuthSuccess }: AuthFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isSignUp, setIsSignUp] = useState(initialView === 'sign-up')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
+  const [message, setMessage] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const returnUrl = searchParams?.get('returnUrl') || '/'
-  const supabase = createClientComponentClient()
+  const supabase = createClientComponentClient<Database>()
+  const isSignUp = initialView === 'sign-up'
+  const plan = searchParams.get('plan')
 
-  useEffect(() => {
-    setIsSignUp(initialView === 'sign-up')
-  }, [initialView])
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) {
-        if (error.message === 'Invalid login credentials') {
-          setError('Invalid email or password. Please try again.')
-        } else {
-          setError(error.message)
-        }
-        return
-      }
-
-      router.push(returnUrl)
-      router.refresh()
-    } catch (error: any) {
-      setError(error.message)
-    } finally {
-      setIsLoading(false)
+  const validateForm = () => {
+    if (!email || !password) {
+      setError('Please fill in all fields')
+      return false
     }
+    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
+      setError('Please enter a valid email address')
+      return false
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return false
+    }
+    return true
   }
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+    setMessage(null)
+
+    if (!validateForm()) {
+      setIsLoading(false)
+      return
+    }
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
+      if (isSignUp) {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              web_ui_enabled: true,
+              credits: 0,
+              role: 'user'
+            }
+          }
+        })
 
-      if (error) {
-        setError(error.message)
-        return
+        if (signUpError) {
+          if (signUpError.message.includes('already registered')) {
+            setError('This email is already registered. Please sign in instead.')
+          } else {
+            setError(signUpError.message)
+          }
+          return
+        }
+
+        if (!data.user?.id) {
+          setError('Failed to create user account')
+          return
+        }
+
+        try {
+          // Create user record in the users table
+          const { error: createUserError } = await supabase
+            .from('users')
+            .insert([
+              {
+                id: data.user.id,
+                email: email,
+                credits: 0,
+                web_ui_enabled: true,
+                role: 'user'
+              }
+            ])
+
+          if (createUserError) {
+            console.error('Error creating user record:', createUserError)
+            // Don't block the sign-up process for DB errors
+          }
+
+          // Store credentials for auto-login after verification
+          sessionStorage.setItem('tempAuthCredentials', JSON.stringify({ email, password }))
+          
+          // Store plan selection if coming from "Start For Free"
+          if (plan === 'trial') {
+            sessionStorage.setItem('selectedPlan', 'trial')
+          }
+
+          setMessage('Please check your email for the verification link.')
+        } catch (dbError) {
+          console.error('Database error:', dbError)
+          // Don't block the sign-up process for DB errors
+        }
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
+
+        if (signInError) {
+          if (signInError.message.includes('Invalid login credentials')) {
+            setError('Invalid email or password')
+          } else {
+            setError(signInError.message)
+          }
+          return
+        }
+
+        if (onAuthSuccess) {
+          onAuthSuccess(email, password)
+        }
       }
-
-      setError('Please check your email for the confirmation link.')
     } catch (error: any) {
-      setError(error.message)
+      setError('An unexpected error occurred. Please try again.')
+      console.error('Auth error:', error)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 w-full px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <h2 className="text-2xl font-semibold text-white text-center">
-          {isSignUp ? 'Create your account' : 'Sign in to your account'}
-        </h2>
-
+    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
+        {message && (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+            <p className="text-green-500 text-sm">{message}</p>
+          </div>
+        )}
+        
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
             <p className="text-red-500 text-sm">{error}</p>
           </div>
         )}
 
-        <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-4">
-          <div className="space-y-4">
-            <div>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-[#0A0A0A] border border-white/10 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#FFBE1A] focus:border-transparent"
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-[#0A0A0A] border border-white/10 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#FFBE1A] focus:border-transparent"
-                placeholder="Password"
-              />
-            </div>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="email" className="sr-only">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              required
+              className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                setError(null)
+              }}
+              disabled={isLoading}
+            />
           </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2 px-4 bg-[#FFBE1A] text-black rounded-lg font-medium hover:bg-[#FFBE1A]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFBE1A] disabled:opacity-50 transition-colors"
-          >
-            {isLoading ? 'Loading...' : (isSignUp ? 'Sign up' : 'Sign in')}
-          </button>
-
-          <div className="text-center">
-            <Link
-              href={isSignUp ? '/auth' : '/auth?view=sign-up'}
-              className="text-[#FFBE1A] hover:text-[#FFBE1A]/80 text-sm font-medium"
-            >
-              {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
-            </Link>
+          <div>
+            <label htmlFor="password" className="sr-only">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              required
+              className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-black focus:border-transparent"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setError(null)
+              }}
+              disabled={isLoading}
+            />
           </div>
-        </form>
-      </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="mt-4 w-full bg-[#FFBE1A] text-black rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#FFBE1A]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFBE1A] disabled:opacity-50 transition-colors"
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Loading...
+            </div>
+          ) : isSignUp ? (
+            'Sign up'
+          ) : (
+            'Sign in'
+          )}
+        </button>
+      </form>
     </div>
   )
-} 
+}

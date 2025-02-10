@@ -143,16 +143,16 @@ export default function Home() {
             </p>
             <div className="flex justify-center gap-4">
               <Link
-                href="/auth/signup"
+                href="/auth?view=sign-up&plan=trial"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors"
               >
-                Start Free Trial
+                Start For Free
               </Link>
               <Link
-                href="#how-it-works"
+                href="/login?callbackUrl=%2Fauth%3Fview%3Dsign-in"
                 className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white px-8 py-3 rounded-lg transition-colors"
               >
-                Learn More
+                Login
               </Link>
             </div>
           </div>

@@ -4,7 +4,9 @@ create table if not exists public.users (
     email text not null,
     credits integer default 0 not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    web_ui_enabled boolean default false not null,
+    role text default 'user' not null
 );
 
 -- Enable RLS
