@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { UserCircleIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
@@ -23,7 +23,7 @@ export default function ProfileSettings() {
   const router = useRouter()
   const supabase = createClientComponentClient()
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       setError(null)
       
@@ -118,11 +118,11 @@ export default function ProfileSettings() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [supabase, router, setProfile, setError, setIsLoading])
 
   useEffect(() => {
     fetchProfile()
-  }, [])
+  }, [fetchProfile])
 
   async function updateProfile(e: React.FormEvent) {
     e.preventDefault()

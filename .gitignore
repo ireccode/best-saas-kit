@@ -42,3 +42,17 @@ next-env.d.ts
 
 # 
 .env.Example
+
+# cursor ai agent tools
+.cursorrules
+/tools
+/venv
+tools_README.md
+.vscode.example
+.env
+.devcontainer
+tools_requirements.txt
+
+# docker logs
+nginx/logs
+nginx/access.log

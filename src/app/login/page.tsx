@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const searchParams = useSearchParams()
@@ -16,29 +16,7 @@ export default function LoginPage() {
 
   const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard'
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.push(callbackUrl)
-    }
-  }, [status, router, callbackUrl])
-
-  useEffect(() => {
-    // Check for stored credentials
-    const storedCredentials = sessionStorage.getItem('tempAuthCredentials')
-    if (storedCredentials && !autoLoginAttempted) {
-      setAutoLoginAttempted(true)
-      const { email, password } = JSON.parse(storedCredentials)
-      // Clear stored credentials immediately
-      sessionStorage.removeItem('tempAuthCredentials')
-      
-      // Auto-login with stored credentials
-      setEmail(email)
-      setPassword(password)
-      handleSubmit(null, email, password)
-    }
-  }, [autoLoginAttempted])
-
-  const handleSubmit = async (e: React.FormEvent | null, autoEmail?: string, autoPassword?: string) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent | null, autoEmail?: string, autoPassword?: string) => {
     if (e) {
       e.preventDefault()
     }
@@ -70,7 +48,29 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [email, password, router, callbackUrl])
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push(callbackUrl)
+    }
+  }, [status, router, callbackUrl])
+
+  useEffect(() => {
+    // Check for stored credentials
+    const storedCredentials = sessionStorage.getItem('tempAuthCredentials')
+    if (storedCredentials && !autoLoginAttempted) {
+      setAutoLoginAttempted(true)
+      const { email, password } = JSON.parse(storedCredentials)
+      // Clear stored credentials immediately
+      sessionStorage.removeItem('tempAuthCredentials')
+      
+      // Auto-login with stored credentials
+      setEmail(email)
+      setPassword(password)
+      handleSubmit(null, email, password)
+    }
+  }, [autoLoginAttempted, handleSubmit])
 
   if (status === 'loading') {
     return (
@@ -162,5 +162,17 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }

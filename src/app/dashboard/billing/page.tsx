@@ -106,68 +106,66 @@ export default function BillingPage() {
         return
       }
       setUser(user)
-      await fetchBillingData(user.id)
+
+      // Moved fetchBillingData logic inside useCallback
+      try {
+        // Fetch current subscription
+        const { data: subscription, error: subError } = await supabase
+          .from('customer_subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle()
+
+        if (subError) {
+          // Only log real errors, not "no rows returned"
+          if (subError.code !== 'PGRST116') {
+            console.error('Error fetching subscription:', subError)
+            setError('Error loading subscription data')
+          } else {
+            // No active subscription found - this is normal for new users
+            console.log('No active subscription found')
+            setCurrentSubscription(null)
+          }
+        } else {
+          setCurrentSubscription(subscription)
+        }
+
+        // Fetch billing history
+        const { data: history, error: historyError } = await supabase
+          .from('billing_history')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (historyError) {
+          // Only log real errors, not "no rows returned"
+          if (historyError.code !== 'PGRST116') {
+            console.error('Error fetching billing history:', historyError)
+            setError('Error loading billing history')
+          } else {
+            console.log('No billing history found')
+            setBillingHistory([])
+          }
+        } else {
+          setBillingHistory(history || [])
+        }
+      } catch (err) {
+        console.error('Error fetching billing data:', err)
+        setError('Failed to load billing information')
+      }
     } catch (error) {
       console.error('Error checking user:', error)
       setError('Authentication error occurred')
     } finally {
       setIsLoading(false)
     }
-  }, [supabase.auth, router])
+  }, [supabase, router, setUser, setCurrentSubscription, setBillingHistory, setError, setIsLoading])
 
   useEffect(() => {
     checkUser()
   }, [checkUser])
-
-  async function fetchBillingData(userId: string) {
-    try {
-      // Fetch current subscription
-      const { data: subscription, error: subError } = await supabase
-        .from('customer_subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .maybeSingle()
-
-      if (subError) {
-        // Only log real errors, not "no rows returned"
-        if (subError.code !== 'PGRST116') {
-          console.error('Error fetching subscription:', subError)
-          setError('Error loading subscription data')
-        } else {
-          // No active subscription found - this is normal for new users
-          console.log('No active subscription found')
-          setCurrentSubscription(null)
-        }
-      } else {
-        setCurrentSubscription(subscription)
-      }
-
-      // Fetch billing history
-      const { data: history, error: historyError } = await supabase
-        .from('billing_history')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (historyError) {
-        // Only log real errors, not "no rows returned"
-        if (historyError.code !== 'PGRST116') {
-          console.error('Error fetching billing history:', historyError)
-          setError('Error loading billing history')
-        } else {
-          console.log('No billing history found')
-          setBillingHistory([])
-        }
-      } else {
-        setBillingHistory(history || [])
-      }
-    } catch (err) {
-      console.error('Error fetching billing data:', err)
-      setError('Failed to load billing information')
-    }
-  }
 
   async function handleSubscribe(priceId: string) {
     try {
@@ -221,7 +219,7 @@ export default function BillingPage() {
       if (!response.ok) throw new Error(result.error)
 
       // Refresh billing data
-      await fetchBillingData(user.id)
+      await checkUser()
     } catch (err) {
       console.error('Error:', err)
       setError(err instanceof Error ? err.message : 'Failed to cancel subscription')

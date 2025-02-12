@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
@@ -19,49 +19,30 @@ export default function Dashboard() {
     }
   }, [status, router])
 
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const fetchProfileData = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user && !controller.signal.aborted) {
-          const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single()
-          
-          if (data && !controller.signal.aborted) {
-            setProfile(data)
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error)
-      }
-    }
-
-    fetchProfileData()
-
-    return () => controller.abort()
-  }, [supabase.auth])
-
-  async function fetchProfile() {
+  const fetchProfileData = useCallback(async (signal?: AbortSignal) => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
+      if (user && (!signal || !signal.aborted)) {
         const { data } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single()
         
-        if (data) setProfile(data)
+        if (data && (!signal || !signal.aborted)) {
+          setProfile(data)
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
     }
-  }
+  }, [supabase, setProfile])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchProfileData(controller.signal)
+    return () => controller.abort()
+  }, [fetchProfileData])
 
   if (status === 'loading') {
     return <div>Loading...</div>
