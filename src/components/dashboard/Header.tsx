@@ -5,14 +5,8 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Database } from '@/types/supabase'
-import Image from 'next/image';
-import ThemeSwitch from './ThemeSwitch';
-
-interface User {
-  id: string
-  email: string
-  credits: number
-}
+import Image from 'next/image'
+import { User } from '@/types/user'
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null)
@@ -56,7 +50,9 @@ export default function Header() {
           setUser({
             id: userData.id,
             email: userData.email,
-            credits: creditsData?.credits ?? 0
+            credits: creditsData?.credits ?? 0,
+            web_ui_enabled: false, // Default value
+            role: 'user' // Default value
           })
         }
       } catch (error) {
@@ -113,7 +109,8 @@ export default function Header() {
                 if (!mounted || !payload.new) return
                 setUser(prev => prev ? {
                   ...prev,
-                  credits: payload.new.credits
+                  //credits: payload.new.credits
+                  credits: 0
                 } : null)
               }
             )
@@ -245,4 +242,4 @@ export default function Header() {
       </div>
     </header>
   )
-} 
+}

@@ -14,7 +14,17 @@ import {
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 // Define pricing plans
-const pricingPlans = [
+interface PricingPlan {
+  title: string
+  price: string
+  description: string
+  features: string[]
+  buttonText: string
+  priceId: string
+  popular?: boolean
+}
+
+const pricingPlans: PricingPlan[] = [
   {
     title: 'Free Trial',
     price: '0',
@@ -26,7 +36,8 @@ const pricingPlans = [
       'Community support',
     ],
     buttonText: 'Start Free Trial',
-    priceId: 'price_1Qm627LqVp8miPvfxiCoHY4b'
+    priceId: 'price_1Qm627LqVp8miPvfxiCoHY4b',
+    popular: false
   },
   {
     title: 'Professional',
@@ -40,7 +51,8 @@ const pricingPlans = [
       'Architecture history',
     ],
     buttonText: 'Get Started',
-    priceId: 'price_1Qm5yDLqVp8miPvflz7kx3jW'
+    priceId: 'price_1Qm5yDLqVp8miPvflz7kx3jW',
+    popular: true
   },
   {
     title: 'Enterprise',
@@ -54,7 +66,8 @@ const pricingPlans = [
       'Training and onboarding',
     ],
     buttonText: 'Contact Sales',
-    priceId: 'price_enterprise'
+    priceId: 'price_enterprise',
+    popular: false
   },
 ]
 

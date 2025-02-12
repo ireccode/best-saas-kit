@@ -21,8 +21,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const cookieStore = await cookies()
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+    const supabase = createRouteHandlerClient<{ public: { Tables: {} } }>({ cookies: () => cookies() })
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -177,7 +176,7 @@ export async function POST(req: Request) {
     } catch (error) {
       console.error('n8n error:', error)
       
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         return NextResponse.json(
           { error: 'Request timeout - the AI service is taking too long to respond' },
           { status: 504 }

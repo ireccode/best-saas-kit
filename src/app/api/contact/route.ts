@@ -73,18 +73,19 @@ ${message}
         { message: 'Message sent successfully' },
         { status: 200 }
       )
-    } catch (smtpError) {
+    } catch (smtpError: any) {
       console.error('SMTP Error:', smtpError)
-      throw new Error(`SMTP Error: ${smtpError.message}`)
+      const errorMessage = smtpError instanceof Error ? smtpError.message : 'Unknown SMTP error'
+      throw new Error(`SMTP Error: ${errorMessage}`)
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error details:', {
       name: error.name,
-      message: error.message,
+      message: error instanceof Error ? error.message : 'Unknown error',
       stack: error.stack
     })
     return NextResponse.json(
-      { error: error.message || 'Failed to send message' },
+      { error: error instanceof Error ? error.message : 'Failed to send message' },
       { status: 500 }
     )
   }

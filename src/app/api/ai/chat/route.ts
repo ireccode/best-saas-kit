@@ -1,55 +1,53 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { Database } from '@/types/supabase'
 import { generateToken } from '@/lib/jwt'
 import { verifyCredits, deductCredits } from '@/lib/credits'
 
 // Validate webhook URL
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://smartechall.app.n8n.cloud/webhook-test/8982df3e-aa27-4489-ad0f-f62c65e25abe'
 const REQUIRED_CREDITS = 1
-const WEBHOOK_TIMEOUT = 930000 // 930 seconds
+const REQUEST_TIMEOUT = 30000 // 30 seconds
 
-interface N8nResponseItem {
-  action: string
-  response: {
-    output: string
-  }
+interface ChatMessage {
+  role: string
+  content: string
 }
 
-interface N8nErrorResponse {
-  code: number
-  message: string
+interface ChatResponse {
+  messages: ChatMessage[]
+  error?: string
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     // Validate webhook URL
     if (!N8N_WEBHOOK_URL) {
       console.error('N8N_WEBHOOK_URL not configured')
-      return NextResponse.json(
-        { error: 'Service configuration error' },
+      return new NextResponse(
+        JSON.stringify({ error: 'Service configuration error' }),
         { status: 500 }
       )
     }
 
-    const cookieStore = await cookies()
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookies() })
     
     // Parse request body before any async operations
     const { messages } = await req.json()
-
+    
     if (!Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid messages format' },
+      return new NextResponse(
+        JSON.stringify({ error: 'Invalid messages format' }),
         { status: 400 }
       )
     }
 
     // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Unauthorized' }),
         { status: 401 }
       )
     }
@@ -57,17 +55,17 @@ export async function POST(req: Request) {
     // Verify credits
     let userCredits
     try {
-      userCredits = await verifyCredits(supabase, user.id, REQUIRED_CREDITS)
+      userCredits = await verifyCredits(supabase, session.user.id, REQUIRED_CREDITS)
     } catch (error) {
-      console.error('Error verifying credits:', error)
-      if (error instanceof Error && error.message === 'Insufficient credits') {
-        return NextResponse.json(
-          { error: 'Insufficient credits' },
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      if (errorMessage === 'Insufficient credits') {
+        return new NextResponse(
+          JSON.stringify({ error: 'Insufficient credits' }),
           { status: 403 }
         )
       }
-      return NextResponse.json(
-        { error: 'Error checking credits' },
+      return new NextResponse(
+        JSON.stringify({ error: 'Error checking credits' }),
         { status: 500 }
       )
     }
@@ -75,128 +73,119 @@ export async function POST(req: Request) {
     // Generate JWT for n8n
     let token: string
     try {
-      token = generateToken(user.id, userCredits.credits)
+      token = generateToken(session.user.id, userCredits.credits)
     } catch (error) {
-      console.error('Error generating token:', error)
-      return NextResponse.json(
-        { error: 'Error generating token' },
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      return new NextResponse(
+        JSON.stringify({ error: errorMessage }),
         { status: 500 }
       )
     }
 
-    // Call n8n webhook with JWT
-    let n8nResponse: Response
+    // Set up request timeout
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
+
     try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT)
+      // Make request to n8n
+      const response = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          messages,
+          userId: session.user.id,
+          timestamp: new Date().toISOString()
+        }),
+        signal: controller.signal
+      })
 
-      try {
-        n8nResponse = await fetch(N8N_WEBHOOK_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            messages,
-            userId: user.id,
-            timestamp: new Date().toISOString()
-          }),
-          signal: controller.signal
-        })
-      } finally {
-        clearTimeout(timeoutId)
-      }
+      clearTimeout(timeout)
 
-      if (!n8nResponse.ok) {
-        const errorText = await n8nResponse.text()
-        let errorResponse: N8nErrorResponse
+      if (!response.ok) {
+        let errorResponse
         try {
-          errorResponse = JSON.parse(errorText)
+          errorResponse = await response.json()
         } catch {
-          errorResponse = { code: n8nResponse.status, message: errorText }
+          errorResponse = { message: 'Unknown error' }
         }
-
-        console.error('n8n error response:', errorResponse)
         
         // Handle specific n8n error cases
         if (errorResponse.code === 404 && errorResponse.message.includes('webhook')) {
-          return NextResponse.json(
-            { error: 'AI service is temporarily unavailable. Please wait a moment and try again.' },
+          return new NextResponse(
+            JSON.stringify({ error: 'AI service is temporarily unavailable. Please wait a moment and try again.' }),
             { status: 503 }
           )
         }
 
         if (errorResponse.message.includes('Workflow could not be started')) {
-          return NextResponse.json(
-            { error: 'AI service temporarily unavailable. Please try again in a few minutes.' },
+          return new NextResponse(
+            JSON.stringify({ error: 'AI service temporarily unavailable. Please try again in a few minutes.' }),
             { status: 503 }
           )
         }
 
-        throw new Error(JSON.stringify(errorResponse))
+        throw new Error(errorResponse.message || 'Unknown error')
       }
 
-      const data = await n8nResponse.json()
-      console.log('Raw n8n response:', JSON.stringify(data, null, 2))
+      const data: ChatResponse = await response.json()
 
       // Check for explicit error response
       if (data.error) {
         console.error('n8n returned error:', data.error)
-        return NextResponse.json(
-          { error: 'The AI service encountered an error. Please try again.' },
+        return new NextResponse(
+          JSON.stringify({ error: 'The AI service encountered an error. Please try again.' }),
           { status: 500 }
         )
       }
 
-      // Get the output from the response, handling both array and single object formats
-      let output = ''
-      if (Array.isArray(data)) {
-        // Get the last item if it's an array
-        const lastItem = data[data.length - 1]
-        output = lastItem.response?.output || lastItem.output || ''
-      } else if (typeof data === 'object') {
-        // Handle single object response
-        output = data.response?.output || data.output || ''
+      // Format the response
+      const formattedData = {
+        messages: data.messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
       }
-
-      // Return consistent format
-      const formattedData = [{
-        action: 'parse',
-        response: {
-          output: output || 'No response received from the AI service'
-        }
-      }]
 
       // Deduct credits only after successful n8n response
       try {
-        await deductCredits(supabase, user.id, REQUIRED_CREDITS)
+        await deductCredits(supabase, session.user.id, REQUIRED_CREDITS)
       } catch (error) {
-        console.error('Error deducting credits:', error)
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+        console.error('Error deducting credits:', errorMessage)
         // Log this error but don't fail the request since n8n already processed it
       }
 
-      return NextResponse.json(formattedData)
+      return new NextResponse(
+        JSON.stringify(formattedData),
+        { status: 200 }
+      )
+
     } catch (error) {
+      clearTimeout(timeout)
       console.error('n8n error:', error)
       
-      if (error.name === 'AbortError') {
-        return NextResponse.json(
-          { error: 'Request timeout - the AI service is taking too long to respond' },
+      if (error instanceof Error && error.name === 'AbortError') {
+        return new NextResponse(
+          JSON.stringify({ error: 'Request timeout - the AI service is taking too long to respond' }),
           { status: 504 }
         )
       }
 
-      return NextResponse.json(
-        { error: error instanceof Error ? error.message : 'Error processing request. Please try again.' },
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      return new NextResponse(
+        JSON.stringify({ error: errorMessage }),
         { status: 500 }
       )
     }
 
   } catch (error) {
     console.error('Error in chat endpoint:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+    return new NextResponse(
+      JSON.stringify({ error: errorMessage }),
       { status: 500 }
     )
   }

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import Stripe from 'stripe'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { Database } from '@/types/supabase'
+import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-11-20.acacia',
@@ -13,23 +14,22 @@ export async function POST(req: Request) {
     const { priceId } = body
 
     if (!priceId) {
-      return NextResponse.json(
-        { error: 'Price ID is required' },
+      return new NextResponse(
+        JSON.stringify({ error: 'Price ID is required' }),
         { status: 400 }
       )
     }
 
     // Initialize Supabase client with cookies
-    const cookieStore = await cookies()
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+    const supabase = createRouteHandlerClient<Database>({ cookies })
 
     // Get the user from the session
     const { data, error: sessionError } = await supabase.auth.getSession()
     
-    if (sessionError) {
+    if (sessionError || !data.session) {
       console.error('Session error:', sessionError)
-      return NextResponse.json(
-        { error: 'Authentication error' },
+      return new NextResponse(
+        JSON.stringify({ error: 'Authentication error' }),
         { status: 401 }
       )
     }
@@ -37,8 +37,8 @@ export async function POST(req: Request) {
     const session = data.session
     if (!session?.user) {
       console.error('No session or user found')
-      return NextResponse.json(
-        { error: 'Please log in to continue' },
+      return new NextResponse(
+        JSON.stringify({ error: 'Please log in to continue' }),
         { status: 401 }
       )
     }
@@ -89,11 +89,14 @@ export async function POST(req: Request) {
       },
     })
 
-    return NextResponse.json({ url: checkoutSession.url })
+    return new NextResponse(
+      JSON.stringify({ url: checkoutSession.url }),
+      { status: 200 }
+    )
   } catch (err) {
     console.error('Error creating checkout session:', err)
-    return NextResponse.json(
-      { error: 'Error creating checkout session' },
+    return new NextResponse(
+      JSON.stringify({ error: 'Error creating checkout session' }),
       { status: 500 }
     )
   }

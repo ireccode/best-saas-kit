@@ -197,8 +197,8 @@ export async function POST(req: Request) {
               subscription_id: subscriptionData.id,
               amount: session.amount_total ? session.amount_total / 100 : 0, // Convert from cents
               currency: session.currency || 'usd',
-              status: 'succeeded',
-              invoice_url: session.invoice_url || null
+              status: 'succeeded'
+             // ,invoice_url: session.invoice?.pdf || null
             })
 
           if (billingError) {

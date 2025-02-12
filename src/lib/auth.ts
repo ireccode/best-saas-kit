@@ -2,6 +2,16 @@ import { NextAuthOptions } from 'next-auth';
 import { createClient } from '@supabase/supabase-js';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
+interface User {
+  id: string
+  name?: string | null
+  email?: string | null
+  image?: string | null
+  credits?: number
+  web_ui_enabled?: boolean
+  role?: string
+}
+
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
   throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL');
 }
@@ -76,7 +86,7 @@ export const authOptions: NextAuthOptions = {
             credits: userData?.credits || 0,
             webUIEnabled: userData?.web_ui_enabled || false,
             roles: [userData?.role || 'user'],
-          };
+          } as User;
         } catch (error) {
           console.error('Authorization error:', error);
           throw error;
@@ -89,6 +99,8 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.name = user.name;
+        token.picture = user.image;
         token.credits = (user as any).credits;
         token.webUIEnabled = (user as any).webUIEnabled;
         token.roles = (user as any).roles;
@@ -96,8 +108,12 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session?.user) {
-        session.user.id = token.id as string;
+      if (session?.user && token) {
+        //session.user.id = token.id as string;
+        (session.user as any).id = token.id as string;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.image = token.picture as string | null;
         (session.user as any).credits = token.credits;
         (session.user as any).webUIEnabled = token.webUIEnabled;
         (session.user as any).roles = token.roles;
@@ -106,3 +122,14 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+export async function getUserById(userId: string) {
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single()
+
+  if (error) throw error
+  return user as User
+}

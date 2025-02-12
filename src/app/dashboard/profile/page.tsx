@@ -11,6 +11,7 @@ interface Profile {
   full_name?: string
   avatar_url?: string | null
   website?: string
+  email?: string
 }
 
 export default function ProfileSettings() {
@@ -47,7 +48,7 @@ export default function ProfileSettings() {
       // First check if profile exists
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
-        .select('id, username, full_name, avatar_url, website')
+        .select('id, username, full_name, avatar_url, website, email')
         .eq('id', user.id)
 
       console.log('Profile query response:', { data: profiles, error: profileError })
@@ -87,6 +88,7 @@ export default function ProfileSettings() {
             full_name: '',
             avatar_url: null,
             website: '',
+            email: '',
           }])
           .select()
           .single()

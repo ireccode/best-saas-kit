@@ -79,11 +79,13 @@ export default function Chat() {
         }
 
         return data
-      } catch (error) {
+      } catch (error: unknown) {
         if (retry < MAX_RETRIES && (
+          error instanceof Error && (
           error.message.includes('temporarily unavailable') ||
           error.message.includes('service is processing') ||
           error.message.includes("Model output doesn't fit required format")
+          )
         )) {
           const waitTime = Math.min(2000 * Math.pow(2, retry), 10000)
           console.log(`Error occurred, waiting ${waitTime}ms before retry ${retry + 1} of ${MAX_RETRIES}`)

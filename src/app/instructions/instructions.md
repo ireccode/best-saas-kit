@@ -411,3 +411,139 @@ Compliance with OWASP Top 10 security standards
 The solution leverages Supabase's native authentication system while integrating seamlessly with Open-WebUI's OIDC requirements through JWT token exchange.
 
 
+# Use Node.js LTS version
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies first (caching)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy application code
+COPY . .
+
+# Build application
+RUN npm run build
+
+# Remove development dependencies
+RUN npm prune --production
+
+# Expose port
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"]
+
+Step 1: Create the docker-compose.yml as in the below example but adjust it for this Next.js application with best practices in mind.
+
+---
+
+version: '3'
+services:
+  app:
+    image: node:latest
+    volumes:
+      - ./app:/usr/src/app
+    working_dir: /usr/src/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_URL=postgres://username:password@db:5432/dbname
+    command: npm install && npm run build && npm start --prefix /usr/src/app
+  db:
+    image: postgres:latest
+    container_name: my_postgres_container
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dbname
+
+---
+
+Step 2: Create Dockerfile as in the below example but adjust it for this Next.js application wieh best practices in mind.
+
+---
+
+# Use an official Node.js runtime as a parent image
+FROM node:latest
+
+# Set the working directory to /usr/src/app
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json (or npm-shrinkwrap.json) into the container at build time
+COPY ./package*.json ./
+
+# Install any dependancies
+RUN npm install --no-optional && \
+    npm cache clean -f
+
+# Copy the rest of your application's source code over
+COPY . .
+
+# Build App Bundle
+RUN npm run build
+
+# Expose port 3000 where we'll be serving our app from inside the container
+EXPOSE 3000
+
+# Run `npm start` to start your app. Port 3000 is forwarded to the host's 3000.
+CMD ["npm", "start"]
+
+---
+3 For sensitive information like API keys, database credentials, etc., you may want to use an environment file. Here’s a sample:
+
+NEXT_PUBLIC_SERVER_URL=https://ownaiweb.techtreasuretrove.in
+
+---
+
+Step 4: Setting Up the Application
+Once you have your docker-compose.yml and Dockerfile in place, you can start building a Docker image as in the below example but adjust it for this Next.js application with best practices in mind.
+
+---
+# Navigate to your project directory
+cd /path/to/your/project
+
+# Create the Docker image
+docker build -t my-nextjs-app .
+
+# Run docker-compose up command
+docker-compose up --build
+
+--
+
+Step 5: Secure Your Website with HTTPS
+After you have a running application, you can secure it by configuring Apache or Nginx to proxy requests and redirecting HTTP traffic to HTTPS using the provided Nginx configuration.
+
+---
+server {
+    listen 80;
+    server_name ownaiweb.techtreasuretrove.in;
+
+    # Redirect all HTTP traffic to HTTPS with a 301 response code (permanent redirect)
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name ownaiweb.techtreasuretrove.in;
+
+    # SSL Configuration
+    ssl_certificate /path/to/your/cert.pem;
+    ssl_certificate_key /path/to/your/private.key;
+    include /etc/nginx/snippets/ssl-params.conf;
+
+    # Location for your Next.js application
+    location / {
+        proxy_pass http://app:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+---
