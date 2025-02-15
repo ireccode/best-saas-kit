@@ -51,6 +51,7 @@ function AuthContent() {
     if (view === 'sign-up') {
       // For sign-up, show verification message
       // The form will handle the message display
+      router.push('/dashboard')
     } else {
       // For sign-in, redirect to appropriate page
       if (sessionStorage.getItem('selectedPlan') === 'trial') {

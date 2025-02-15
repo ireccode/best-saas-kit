@@ -9,6 +9,7 @@ import {
   ClockIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline'
+import PricingCard from '@/app/components/PricingCard'
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
@@ -308,44 +309,7 @@ export default function BillingPage() {
       {/* Available Plans */}
       <div className="bg-[#111111] rounded-2xl p-8 border border-white/5">
         <h2 className="text-xl font-semibold text-white mb-6">Available Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-green-500">
-          {pricingPlans.map((plan) => (
-            <div
-              key={plan.priceId}
-              className={`rounded-lg p-8 ${
-                plan.popular
-                  ? 'bg-green-900/20 border-2 border-green-500'
-                  : 'bg-gray-800/50 border border-gray-700'
-              }`}
-            >
-              <h3 className="text-xl font-semibold mb-4 text-white">{plan.title}</h3>
-              <div className="mb-4">
-                <span className="text-4xl font-bold">${plan.price}</span>
-                <span className="text-gray-400 ml-2">/month</span>
-              </div>
-              <p className="text-gray-400 mb-6">{plan.description}</p>
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-300">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={() => handleSubscribe(plan.priceId)}
-                disabled={currentSubscription?.price_id === plan.priceId}
-                className={`w-full text-center py-3 px-6 rounded-lg transition-colors ${
-                  plan.popular
-                    ? 'bg-green-500 hover:bg-green-600 text-black'
-                    : 'bg-white hover:bg-gray-200 text-black'
-                } disabled:opacity-50`}
-              >
-                {currentSubscription?.price_id === plan.priceId ? 'Current Plan' : 'Subscribe'}
-              </button>
-            </div>
-          ))}
-        </div>
+        <PricingCard /> 
       </div>
 
       {/* Billing History */}

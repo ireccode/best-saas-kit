@@ -36,7 +36,7 @@ function LoginContent() {
         setError(result.error)
       } else if (result?.url) {
         // If the callback URL includes sign-up, redirect to pricing with trial plan
-        if (result.url.includes('view=sign-up')) {
+        if (result.url.includes('view=sign-up') ) {
           router.push('/pricing?plan=trial')
         } else {
           router.push(result.url)

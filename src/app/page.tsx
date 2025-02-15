@@ -36,49 +36,7 @@ const features = [
   },
 ]
 
-const pricingPlans = [
-  {
-    title: 'Free Trial',
-    price: '0',
-    description: 'Perfect for exploring ArchitectAI capabilities',
-    features: [
-      'Limited features',
-      '10 queries per month',
-      'Basic architecture recommendations',
-      'Community support',
-    ],
-    buttonText: 'Start Free Trial',
-    priceId: 'price_1Qm627LqVp8miPvfxiCoHY4b'
-  },
-  {
-    title: 'Professional',
-    price: '299',
-    description: 'For professional SAP architects',
-    features: [
-      'Unlimited queries',
-      'Detailed architecture designs',
-      'Priority support',
-      'Export capabilities',
-      'Architecture history',
-    ],
-    buttonText: 'Get Started',
-    priceId: 'price_1Qm5yDLqVp8miPvflz7kx3jW'
-  },
-  {
-    title: 'Enterprise',
-    price: 'Custom',
-    description: 'For organizations with complex needs',
-    features: [
-      'Unlimited queries',
-      'Priority support',
-      'Custom integrations',
-      'Dedicated account manager',
-      'Training and onboarding',
-    ],
-    buttonText: 'Contact Sales',
-    priceId: 'price_enterprise'
-  },
-]
+
 
 const faqs = [
   {
@@ -242,10 +200,8 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
             Simple, Transparent Pricing
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto text-white" >
-            {pricingPlans.map((plan, index) => (
-              <PricingCard key={index} {...plan} />
-            ))}            
+          <div className="max-w-6xl mx-auto text-white">
+            <PricingCard />
           </div>
         </div>
       </section>
@@ -326,7 +282,7 @@ export default function Home() {
                   </a>
                   <a href="#" className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
                     <svg className="w-5 h-5 text-[#FFBE1A]" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0C5.373 0 0 5.373 0 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" />
+                      <path d="M12 0C5.373 0 0 5.373 0 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.469-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-5.479 5.624-5.467 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
                     </svg>
                   </a>
                   <a href="#" className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">

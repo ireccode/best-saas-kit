@@ -10,30 +10,26 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 interface PricingCardProps {
-  title: string
-  price: string
-  description: string
-  features: string[]
-  buttonText: string
-  popular?: boolean
-  priceId: string
+  name?: string
+  price?: {
+    monthly: number
+    annually: number
+  }
+  description?: string
+  features?: string[]
+  buttonText?: string
+  highlighted?: boolean
+  priceId?: string
 }
 
-const PricingCard = ({
-  title,
-  price,
-  description,
-  features,
-  buttonText,
-  popular = false,
-  priceId,
-}: PricingCardProps) => {
+const PricingCard = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClientComponentClient()
+  const [isAnnual, setIsAnnual] = useState(false)
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (priceId: string) => {
     try {
       setIsLoading(true)
       setError(null)
@@ -75,44 +71,124 @@ const PricingCard = ({
     }
   }
 
-  return (
-    <div
-      className={`rounded-lg p-8 ${
-        popular
-          ? 'bg-green-900/20 border-2 border-green-500'
-          : 'bg-gray-800/50 border border-gray-700'
-      }`}
-    >
-      <h3 className="text-xl font-semibold mb-4">{title}</h3>
-      <div className="mb-4">
-        <span className="text-4xl font-bold">${price}</span>
-        <span className="text-gray-400 ml-2">/month</span>
+  const plans = [
+    {
+      name: 'Free Trial',
+      price: { monthly: 0, annually: 0 },
+      description: 'Perfect for exploring ArchitectAI capabilities',
+      features: [
+        'Limited features',
+        '10 queries per month',
+        'Basic architecture recommendations',
+        'Community support',
+      ],
+      buttonText: 'Start Free Trial',
+      priceId: 'price_1Qm627LqVp8miPvfxiCoHY4b',
+      highlighted: true
+    },
+    {
+      name: 'Professional',
+      price: { monthly: 299, annually: 249 },
+      description: 'For professional SAP architects',
+      features: [
+        'Unlimited queries',
+        'Detailed architecture designs',
+        'Priority support',
+        'Export capabilities',
+        'Architecture history',
+      ],
+      buttonText: 'Get Started',
+      priceId: 'price_1Qm5yDLqVp8miPvflz7kx3jW',
+      highlighted: false
+    },
+    {
+      name: 'Enterprise',
+      price: { monthly: 999, annually: 899 },
+      description: 'For organizations with complex needs',
+      features: [
+        'Unlimited queries',
+        'Priority support',
+        'Custom integrations',
+        'Dedicated account manager',
+        'Training and onboarding',
+      ],
+      buttonText: 'Contact Sales',
+      priceId: 'price_enterprise',
+      highlighted: false
+    }
+  ]
+
+  return (  
+    <div>
+      <div className="flex items-center justify-center gap-4 mb-12">
+          <span className={`text-sm ${!isAnnual ? 'text-white' : 'text-white/60'}`}>Monthly</span>
+          <button
+            onClick={() => setIsAnnual(!isAnnual)}
+            className="relative inline-flex h-6 w-11 items-center rounded-full bg-white/10"
+          >
+            <span className="sr-only">Toggle billing period</span>
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-[#FFBE1A] transition ${
+                isAnnual ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className={`text-sm ${isAnnual ? 'text-white' : 'text-white/60'}`}>
+            Annually <span className="text-[#FFBE1A]">20% off</span>
+          </span>
       </div>
-      <p className="text-gray-400 mb-6">{description}</p>
-      <ul className="space-y-3 mb-8">
-        {features.map((feature, index) => (
-          <li key={index} className="flex items-start gap-3">
-            <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-300">{feature}</span>
-          </li>
+      <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {plans.map((plan) => (
+          <div
+            key={plan.name}
+            className={`rounded-2xl p-8 ${
+              plan.highlighted
+                ? 'bg-gradient-to-b from-[#FFBE1A]/20 to-transparent border-[#FFBE1A]/20'
+                : 'bg-white/5'
+            } border border-white/10 relative`}
+          >
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
+              <h2 className="text-white/60 text-sm">{plan.description}</h2>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-baseline">
+                <span className="text-4xl font-bold text-white">
+                  ${isAnnual ? plan.price.annually : plan.price.monthly}
+                </span>
+                <span className="text-white/60 ml-2">/ month</span>
+              </div>
+              {isAnnual && (
+                <div className="text-sm text-[#FFBE1A] mt-1">
+                  Save ${(plan.price.monthly - plan.price.annually) * 12} a year
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => handleSubscribe(plan.priceId)}
+              disabled={isLoading}
+              className={`w-full py-3 px-4 rounded-lg font-medium mb-8 ${
+                plan.highlighted
+                  ? 'bg-[#FFBE1A] text-black hover:bg-[#FFBE1A]/90'
+                  : 'bg-white/10 text-white hover:bg-white/20'
+              } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {isLoading ? 'Processing...' : plan.buttonText}
+            </button>
+
+            <ul className="space-y-4">
+              {plan.features.map((feature) => (
+                <li key={feature} className="flex items-start gap-3 text-white/80">
+                  <CheckIcon className="h-5 w-5 flex-shrink-0 text-[#FFBE1A]" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
-      </ul>
-      {error && (
-        <div className="text-red-500 text-sm mb-4">
-          {error}
-        </div>
-      )}
-      <button
-        onClick={handleSubscribe}
-        disabled={isLoading}
-        className={`w-full text-center py-3 px-6 rounded-lg transition-colors ${
-          popular
-            ? 'bg-green-500 hover:bg-green-600 text-black'
-            : 'bg-white hover:bg-gray-200 text-black'
-        } disabled:opacity-50`}
-      >
-        {isLoading ? 'Loading...' : buttonText}
-      </button>
+      </div>
     </div>
   )
 }
