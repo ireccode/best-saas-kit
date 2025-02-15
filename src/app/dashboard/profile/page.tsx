@@ -80,16 +80,20 @@ export default function ProfileSettings() {
       // Handle no profile case
       else if (!profiles || profiles.length === 0) {
         console.log('No profile found, creating new profile...')
+        
+        // Create initial profile with user's email
+        const initialProfile = {
+          id: user.id,
+          username: '',
+          full_name: '',
+          avatar_url: null,
+          website: '',
+          email: user.email || ''
+        }
+
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
-          .insert([{ 
-            id: user.id,
-            username: '',
-            full_name: '',
-            avatar_url: null,
-            website: '',
-            email: '',
-          }])
+          .insert([initialProfile])
           .select()
           .single()
 
@@ -97,10 +101,11 @@ export default function ProfileSettings() {
 
         if (insertError) {
           console.error('Profile creation error:', insertError)
-          throw new Error(`Failed to create profile: ${insertError.message}`)
+          // Don't throw error, just set the initial profile
+          setProfile(initialProfile)
+        } else {
+          setProfile(newProfile)
         }
-
-        setProfile(newProfile)
       }
       // Handle single profile case
       else {
@@ -133,7 +138,7 @@ export default function ProfileSettings() {
     setSuccessMessage(null)
 
     try {
-      // Validate username length
+      // Validate username if provided
       if (profile.username && profile.username.length < 3) {
         throw new Error('Username must be at least 3 characters long')
       }
@@ -143,6 +148,8 @@ export default function ProfileSettings() {
         .upsert({
           ...profile,
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'id'
         })
 
       if (error) {

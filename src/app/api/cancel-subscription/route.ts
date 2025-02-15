@@ -13,22 +13,8 @@ export async function POST(req: Request) {
 
     const supabase = createClientComponentClient()
 
-    // Get the subscription from database
-    const { data: subscription } = await supabase
-      .from('customer_subscriptions')
-      .select('subscription_id')
-      .eq('id', subscriptionId)
-      .single()
-
-    if (!subscription) {
-      return NextResponse.json(
-        { error: 'Subscription not found' },
-        { status: 404 }
-      )
-    }
-
     // Cancel the subscription at period end
-    await stripe.subscriptions.update(subscription.subscription_id, {
+    await stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
     })
 
@@ -39,13 +25,13 @@ export async function POST(req: Request) {
         cancel_at_period_end: true,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', subscriptionId)
+      .eq('subscription_id', subscriptionId)
 
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Error canceling subscription:', err)
     return NextResponse.json(
-      { error: 'Error canceling subscription' },
+      { error: err instanceof Error ? err.message : 'Error canceling subscription' },
       { status: 500 }
     )
   }

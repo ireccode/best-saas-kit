@@ -202,27 +202,37 @@ export default function BillingPage() {
   }
 
   async function handleCancelSubscription() {
-    if (!currentSubscription?.id) return
+    if (!currentSubscription?.subscription_id) {
+      console.error('No subscription_id found:', currentSubscription)
+      setError('No active subscription found')
+      return
+    }
 
     try {
       setError(null)
+      console.log('Attempting to cancel subscription:', currentSubscription.subscription_id)
+      
       const response = await fetch('/api/cancel-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          subscriptionId: currentSubscription.id,
+          subscriptionId: currentSubscription.subscription_id,
         }),
       })
 
       const result = await response.json()
-      if (!response.ok) throw new Error(result.error)
+      console.log('Cancel subscription response:', { status: response.status, result })
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to cancel subscription')
+      }
 
       // Refresh billing data
       await checkUser()
     } catch (err) {
-      console.error('Error:', err)
+      console.error('Detailed cancel error:', err)
       setError(err instanceof Error ? err.message : 'Failed to cancel subscription')
     }
   }

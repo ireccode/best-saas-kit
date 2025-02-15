@@ -7,6 +7,7 @@ create table profiles (
   avatar_url text,
   bio text,
   updated_at timestamp with time zone,
+  email text,
 
   constraint username_length check (char_length(username) >= 3)
 );
