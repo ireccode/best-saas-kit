@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import AuthForm from './AuthForm'
@@ -11,58 +11,89 @@ function AuthContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [view, setView] = useState('sign-in')
-  const [mounted, setMounted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const supabase = createClientComponentClient()
 
+  // Get URL parameters
+  const viewParam = searchParams?.get('view')
+  const planParam = searchParams?.get('plan')
+  const callbackUrl = searchParams?.get('callbackUrl')
+  const returnUrl = searchParams?.get('returnUrl')
+
+  const checkUser = useCallback(async () => {
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError) {
+        throw sessionError
+      }
+
+      if (session) {
+        // Determine redirect URL based on priority
+        let redirectTo = '/dashboard'
+
+        if (planParam === 'trial') {
+          redirectTo = '/pricing?plan=trial'
+        } else if (returnUrl && !returnUrl.startsWith('/auth') && !returnUrl.startsWith('/login')) {
+          redirectTo = returnUrl
+        } else if (callbackUrl && !callbackUrl.startsWith('/auth') && !callbackUrl.startsWith('/login')) {
+          redirectTo = callbackUrl
+        }
+
+        router.push(redirectTo)
+      }
+    } catch (error) {
+      console.error('Session check error:', error)
+      setError('Failed to verify authentication status')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase.auth, router, planParam, returnUrl, callbackUrl])
+
   useEffect(() => {
-    setMounted(true)
-    const viewParam = searchParams.get('view')
-    const planParam = searchParams.get('plan')
-    
-    if (viewParam) {
+    // Set the view based on URL parameter
+    if (viewParam && (viewParam === 'sign-in' || viewParam === 'sign-up')) {
       setView(viewParam)
     }
 
-    // Store plan selection if coming from "Start For Free"
-    if (planParam === 'trial' && viewParam === 'sign-up') {
-      sessionStorage.setItem('selectedPlan', 'trial')
-    }
+    // Check user session
+    checkUser()
+  }, [viewParam, checkUser])
 
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        // If user has selected a trial plan, redirect to pricing
-        if (sessionStorage.getItem('selectedPlan') === 'trial') {
-          sessionStorage.removeItem('selectedPlan')
-          router.push('/pricing?plan=trial')
-        } else {
-          router.push('/dashboard')
+  const handleAuthSuccess = useCallback(async (email: string, password: string) => {
+    try {
+      // Store credentials temporarily for auto-login
+      sessionStorage.setItem('tempAuthCredentials', JSON.stringify({ email, password }))
+      
+      // Store trial plan selection if applicable
+      if (planParam === 'trial' && view === 'sign-up') {
+        sessionStorage.setItem('selectedPlan', 'trial')
+      }
+
+      // Determine redirect URL
+      let redirectTo = '/dashboard'
+
+      if (view === 'sign-up') {
+        if (planParam === 'trial') {
+          redirectTo = '/pricing?plan=trial'
+        }
+      } else {
+        if (returnUrl && !returnUrl.startsWith('/auth') && !returnUrl.startsWith('/login')) {
+          redirectTo = returnUrl
+        } else if (callbackUrl && !callbackUrl.startsWith('/auth') && !callbackUrl.startsWith('/login')) {
+          redirectTo = callbackUrl
         }
       }
+
+      router.push(redirectTo)
+    } catch (error) {
+      console.error('Auth success handling error:', error)
+      setError('Failed to complete authentication process')
     }
+  }, [router, view, planParam, returnUrl, callbackUrl])
 
-    checkUser()
-  }, [router, searchParams, supabase.auth])
-
-  const handleAuthSuccess = async (email: string, password: string) => {
-    // Store credentials temporarily
-    sessionStorage.setItem('tempAuthCredentials', JSON.stringify({ email, password }))
-    
-    if (view === 'sign-up') {
-      // For sign-up, show verification message
-      // The form will handle the message display
-      router.push('/dashboard')
-    } else {
-      // For sign-in, redirect to appropriate page
-      if (sessionStorage.getItem('selectedPlan') === 'trial') {
-        router.push('/pricing?plan=trial')
-      } else {
-        router.push('/dashboard')
-      }
-    }
-  }
-
-  if (!mounted) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-white">Loading...</div>
@@ -99,7 +130,7 @@ function AuthContent() {
                 Documentation
               </Link>
               <Link 
-                href={view === 'sign-in' ? '/auth?view=sign-up' : '/login?callbackUrl=%2Fdashboard'} 
+                href={view === 'sign-in' ? `/auth?view=sign-up${planParam ? `&plan=${planParam}` : ''}` : '/login'} 
                 className="text-[#FFBE1A] hover:text-[#FFBE1A]/80 transition-colors"
               >
                 {view === 'sign-in' ? 'Sign up' : 'Sign in'}
@@ -117,11 +148,23 @@ function AuthContent() {
               {view === 'sign-up' ? 'Create your account' : 'Sign in to your account'}
             </h2>
             
-            <AuthForm view={view} onAuthSuccess={handleAuthSuccess} />
+            {error && (
+              <div className="bg-red-500/10 text-red-500 p-4 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+            
+            <AuthForm 
+              view={view} 
+              onAuthSuccess={handleAuthSuccess}
+              plan={planParam}
+              callbackUrl={callbackUrl}
+              returnUrl={returnUrl}
+            />
 
             <div className="text-center">
               <Link
-                href={view === 'sign-in' ? '/auth?view=sign-up' : '/auth?view=sign-in'}
+                href={`/auth?view=${view === 'sign-in' ? 'sign-up' : 'sign-in'}${planParam ? `&plan=${planParam}` : ''}`}
                 className="text-[#FFBE1A] hover:text-[#FFBE1A]/80 text-sm font-medium"
               >
                 {view === 'sign-in' ? "Don't have an account? Sign up" : "Already have an account? Sign in"}

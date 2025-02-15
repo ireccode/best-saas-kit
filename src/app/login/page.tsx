@@ -15,6 +15,7 @@ function LoginContent() {
   const [autoLoginAttempted, setAutoLoginAttempted] = useState(false)
 
   const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard'
+  const plan = searchParams?.get('plan')
 
   const handleSubmit = useCallback(async (e: React.FormEvent | null, autoEmail?: string, autoPassword?: string) => {
     if (e) {
@@ -35,42 +36,60 @@ function LoginContent() {
       if (result?.error) {
         setError(result.error)
       } else if (result?.url) {
-        // If the callback URL includes sign-up, redirect to pricing with trial plan
-        if (result.url.includes('view=sign-up') ) {
+        // Handle trial plan signup flow
+        if (plan === 'trial') {
           router.push('/pricing?plan=trial')
-        } else {
-          router.push(result.url)
+        } 
+        // Handle normal login flow with proper callback
+        else if (callbackUrl && !callbackUrl.startsWith('/auth') && !callbackUrl.startsWith('/login')) {
+          router.push(callbackUrl)
+        } 
+        // Default redirect
+        else {
+          router.push('/dashboard')
         }
       }
     } catch (error) {
-      setError('An error occurred during sign in')
       console.error('Sign in error:', error)
+      setError('An error occurred during sign in')
     } finally {
       setIsLoading(false)
     }
-  }, [email, password, router, callbackUrl])
+  }, [email, password, router, callbackUrl, plan])
 
   useEffect(() => {
+    // If user is already authenticated, handle redirect
     if (status === 'authenticated') {
-      router.push(callbackUrl)
+      if (plan === 'trial') {
+        router.push('/pricing?plan=trial')
+      } else if (callbackUrl && !callbackUrl.startsWith('/auth') && !callbackUrl.startsWith('/login')) {
+        router.push(callbackUrl)
+      } else {
+        router.push('/dashboard')
+      }
     }
-  }, [status, router, callbackUrl])
+  }, [status, router, callbackUrl, plan])
 
   useEffect(() => {
-    // Check for stored credentials
+    // Handle stored credentials for auto-login
     const storedCredentials = sessionStorage.getItem('tempAuthCredentials')
-    if (storedCredentials && !autoLoginAttempted) {
-      setAutoLoginAttempted(true)
-      const { email, password } = JSON.parse(storedCredentials)
-      // Clear stored credentials immediately
-      sessionStorage.removeItem('tempAuthCredentials')
-      
-      // Auto-login with stored credentials
-      setEmail(email)
-      setPassword(password)
-      handleSubmit(null, email, password)
+    if (storedCredentials && !autoLoginAttempted && status !== 'authenticated') {
+      try {
+        setAutoLoginAttempted(true)
+        const { email, password } = JSON.parse(storedCredentials)
+        // Clear stored credentials immediately
+        sessionStorage.removeItem('tempAuthCredentials')
+        
+        // Auto-login with stored credentials
+        setEmail(email)
+        setPassword(password)
+        handleSubmit(null, email, password)
+      } catch (error) {
+        console.error('Error processing stored credentials:', error)
+        sessionStorage.removeItem('tempAuthCredentials')
+      }
     }
-  }, [autoLoginAttempted, handleSubmit])
+  }, [autoLoginAttempted, handleSubmit, status])
 
   if (status === 'loading') {
     return (

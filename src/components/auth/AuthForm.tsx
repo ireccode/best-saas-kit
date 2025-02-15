@@ -8,9 +8,18 @@ import { Database } from '@/types/supabase'
 interface AuthFormProps {
   view?: string
   onAuthSuccess?: (email: string, password: string) => void
+  plan?: string | null
+  callbackUrl?: string | null
+  returnUrl?: string | null
 }
 
-export default function AuthForm({ view: initialView, onAuthSuccess }: AuthFormProps) {
+export default function AuthForm({ 
+  view: initialView, 
+  onAuthSuccess, 
+  plan: propPlan,
+  callbackUrl,
+  returnUrl 
+}: AuthFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -20,7 +29,7 @@ export default function AuthForm({ view: initialView, onAuthSuccess }: AuthFormP
   const searchParams = useSearchParams()
   const supabase = createClientComponentClient<Database>()
   const isSignUp = initialView === 'sign-up'
-  const plan = searchParams.get('plan')
+  const plan = propPlan || searchParams.get('plan')
 
   const validateForm = () => {
     if (!email || !password) {
@@ -55,7 +64,7 @@ export default function AuthForm({ view: initialView, onAuthSuccess }: AuthFormP
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: callbackUrl || `${window.location.origin}/auth/callback`,
             data: {
               web_ui_enabled: true,
               credits: 0,
@@ -127,6 +136,10 @@ export default function AuthForm({ view: initialView, onAuthSuccess }: AuthFormP
 
         if (onAuthSuccess) {
           onAuthSuccess(email, password)
+        } else if (returnUrl) {
+          router.push(returnUrl)
+        } else {
+          router.push('/dashboard')
         }
       }
     } catch (error: any) {
