@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/utils/supabase'
+import { sendPasswordUpdateEmail } from '@/lib/email/send-password-update-email'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -11,40 +12,77 @@ export default function UpdatePassword() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
   const router = useRouter()
+  const supabase = createClientComponentClient()
 
   useEffect(() => {
-    // Check if we have a session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
+    // Check if user is authenticated
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
         router.push('/auth')
       }
     }
-    checkSession()
-  }, [router])
+    checkUser()
+  }, [supabase.auth, router])
 
-  const handleUpdatePassword = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+    setMessage(null)
 
+    // Validate passwords
     if (password !== confirmPassword) {
       setError('Passwords do not match')
       setIsLoading(false)
       return
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      setIsLoading(false)
+      return
+    }
+
     try {
-      const { error } = await supabase.auth.updateUser({
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('No authenticated user')
+      }
+
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
         password: password
       })
-      if (error) throw error
+
+      if (updateError) {
+        throw updateError
+      }
+
+      // Send confirmation email
+      try {
+        await sendPasswordUpdateEmail({
+          to: user.email || '',
+          username: user.email?.split('@')[0] || 'user',
+          updatedAt: new Date().toISOString(),
+        })
+      } catch (emailError) {
+        console.error('Error sending password update confirmation:', emailError)
+        // Don't block the process for email errors
+      }
+
+      setMessage('Your password has been updated successfully')
       
-      // Password updated successfully
-      router.push('/auth?message=Password updated successfully')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      // Redirect to dashboard after a short delay
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 2000)
+    } catch (error) {
+      console.error('Update password error:', error)
+      setError('Failed to update password. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -75,7 +113,19 @@ export default function UpdatePassword() {
             </p>
           </div>
 
-          <form onSubmit={handleUpdatePassword} className="space-y-4">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4">
+              <p className="text-red-500 text-sm">{error}</p>
+            </div>
+          )}
+
+          {message && (
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 mb-4">
+              <p className="text-green-500 text-sm">{message}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-1.5">
                 New Password
@@ -89,6 +139,7 @@ export default function UpdatePassword() {
                 placeholder="Enter your new password"
                 required
                 minLength={6}
+                disabled={isLoading}
               />
             </div>
 
@@ -105,12 +156,9 @@ export default function UpdatePassword() {
                 placeholder="Confirm your new password"
                 required
                 minLength={6}
+                disabled={isLoading}
               />
             </div>
-
-            {error && (
-              <div className="text-red-500 text-sm mt-2">{error}</div>
-            )}
 
             <button
               type="submit"

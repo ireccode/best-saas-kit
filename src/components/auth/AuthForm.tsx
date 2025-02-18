@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Database } from '@/types/supabase'
+import { sendWelcomeEmail } from '@/lib/email/send-welcome-email'
 
 interface AuthFormProps {
   view?: string
@@ -88,22 +89,36 @@ export default function AuthForm({
         }
 
         try {
-          // Create user record in the users table
-          const { error: createUserError } = await supabase
-            .from('users')
-            .insert([
-              {
-                id: data.user.id,
-                email: email,
-                credits: 0,
-                web_ui_enabled: true,
-                role: 'user'
-              }
-            ])
+          // Create user record through API route
+          const response = await fetch('/api/auth/create-user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: data.user.id,
+              email: email,
+              credits: 0,
+              web_ui_enabled: true,
+              role: 'user'
+            }),
+          })
 
-          if (createUserError) {
-            console.error('Error creating user record:', createUserError)
+          if (!response.ok) {
+            const error = await response.json()
+            console.error('Error creating user record:', error)
             // Don't block the sign-up process for DB errors
+          }
+
+          // Send welcome email
+          try {
+            await sendWelcomeEmail({
+              to: email,
+              username: email.split('@')[0], // Use email prefix as username
+            })
+          } catch (emailError) {
+            console.error('Error sending welcome email:', emailError)
+            // Don't block the sign-up process for email errors
           }
 
           // Store credentials for auto-login after verification

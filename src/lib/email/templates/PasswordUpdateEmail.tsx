@@ -10,15 +10,15 @@ import {
   Section,
   Text,
 } from '@react-email/components'
-import { WelcomeEmailProps } from '../index'
+import { PasswordUpdateEmailProps } from '../index'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-export const WelcomeEmail = ({
-  username = '',
-  loginUrl = `${baseUrl}/login`,
-}: WelcomeEmailProps) => {
-  const previewText = `Welcome to AI Assistant 4 Architect!`
+export const PasswordUpdateEmail = ({
+  username,
+  updatedAt,
+}: PasswordUpdateEmailProps) => {
+  const previewText = 'Your AI Assistant 4 Architect password has been updated'
 
   return (
     <Html>
@@ -35,38 +35,43 @@ export const WelcomeEmail = ({
             />
           </Section>
           
-          <Heading style={heading}>Welcome to AI Assistant 4 Architect!</Heading>
+          <Heading style={heading}>Password Updated Successfully</Heading>
           
           <Text style={paragraph}>Hi {username},</Text>
           
           <Text style={paragraph}>
-            Thank you for signing up for AI Assistant 4 Architect. We're excited to have you on board!
+            This email confirms that your AI Assistant 4 Architect account password
+            was changed on {new Date(updatedAt).toLocaleString()}.
           </Text>
           
           <Text style={paragraph}>
-            AI Assistant 4 Architect is your intelligent partner for SAP architecture design and decision-making.
-            Our AI-powered platform helps you:
+            If you did not make this change, please contact our support team
+            immediately or reset your password using the button below.
           </Text>
           
-          <ul style={list}>
-            <li>Get instant, contextually aware SAP BTP architecture recommendations</li>
-            <li>Access curated SAP architecture patterns and best practices</li>
-            <li>Streamline your solution design process</li>
-          </ul>
-          
           <Section style={buttonContainer}>
-            <Link href={loginUrl} style={button}>
-              Get Started
+            <Link href={`${baseUrl}/auth/reset-password`} style={button}>
+              Reset Password
             </Link>
           </Section>
           
           <Text style={paragraph}>
-            If you have any questions, feel free to reply to this email. We're here to help!
+            For security reasons, we recommend:
           </Text>
+          
+          <ul style={list}>
+            <li>Using a strong, unique password</li>
+            <li>Enabling two-factor authentication if available</li>
+            <li>Never sharing your password with anyone</li>
+          </ul>
           
           <Text style={paragraph}>
             Best regards,<br />
             The AI Assistant 4 Architect Team
+          </Text>
+          
+          <Text style={footer}>
+            This is an automated message. Please do not reply to this email.
           </Text>
         </Container>
       </Body>
@@ -134,4 +139,11 @@ const button = {
   textAlign: 'center' as const,
 }
 
-export default WelcomeEmail 
+const footer = {
+  color: '#666666',
+  fontSize: '12px',
+  lineHeight: '1.5',
+  margin: '24px 0 0',
+}
+
+export default PasswordUpdateEmail 

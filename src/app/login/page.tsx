@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Subscription } from '@supabase/supabase-js'
 
 function LoginContent() {
   const router = useRouter()
@@ -15,6 +16,7 @@ function LoginContent() {
   const [autoLoginAttempted, setAutoLoginAttempted] = useState(false)
 
   const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard'
+  const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null)
   const plan = searchParams?.get('plan')
 
   const handleSubmit = useCallback(async (e: React.FormEvent | null, autoEmail?: string, autoPassword?: string) => {
@@ -57,10 +59,12 @@ function LoginContent() {
     }
   }, [email, password, router, callbackUrl, plan])
 
+
+
   useEffect(() => {
     // If user is already authenticated, handle redirect
     if (status === 'authenticated') {
-      if (plan === 'trial') {
+      if (!currentSubscription?.id  && plan === 'trial') {
         router.push('/pricing?plan=trial')
       } else if (callbackUrl && !callbackUrl.startsWith('/auth') && !callbackUrl.startsWith('/login')) {
         router.push(callbackUrl)

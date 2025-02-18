@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/utils/supabase'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { sendPasswordResetEmail } from '@/lib/email/send-password-reset-email'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -9,27 +10,44 @@ export default function ResetPassword() {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const supabase = createClientComponentClient()
 
-  const handleReset = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) {
-      setError('Please enter your email address')
-      return
-    }
-
     setIsLoading(true)
     setError(null)
-    
+    setMessage(null)
+
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
-      })
-      if (error) throw error
-      setSuccess(true)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-      setSuccess(false)
+      // Generate reset token
+      const { data, error: resetError } = await supabase.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo: `${window.location.origin}/auth/update-password`,
+        }
+      )
+
+      if (resetError) {
+        throw resetError
+      }
+
+      // Send password reset email
+      try {
+        await sendPasswordResetEmail({
+          to: email,
+          resetToken: data?.user?.id || '', // Use user ID as reset token
+          expiresIn: '1 hour',
+        })
+      } catch (emailError) {
+        console.error('Error sending password reset email:', emailError)
+        // Still show success message since the reset token was generated
+      }
+
+      setMessage('Check your email for the password reset link.')
+    } catch (error) {
+      console.error('Reset password error:', error)
+      setError('Failed to send password reset email. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -56,74 +74,71 @@ export default function ResetPassword() {
               Reset your password
             </h2>
             <p className="text-white/60">
-              Enter your email address and we'll send you instructions to reset your password.
+              Enter your email address and we'll send you a link to reset your password.
             </p>
           </div>
 
-          {success ? (
-            <div className="text-center">
-              <div className="bg-green-500/10 text-green-500 p-4 rounded-lg mb-6">
-                Check your email for the password reset link.
-                <div className="mt-2 text-sm">
-                  Didn't receive the email? Check your spam folder or try again.
-                </div>
-              </div>
-              <div className="space-y-4">
-                <button
-                  onClick={() => setSuccess(false)}
-                  className="text-[#FFBE1A] hover:underline font-medium"
-                >
-                  Try again
-                </button>
-                <div className="block">
-                  <Link
-                    href="/auth"
-                    className="text-white/60 hover:text-white"
-                  >
-                    Back to sign in
-                  </Link>
-                </div>
-              </div>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+              <p className="text-red-500 text-sm">{error}</p>
             </div>
-          ) : (
-            <form onSubmit={handleReset} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-1.5">
-                  Email address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFBE1A] focus:border-transparent"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-
-              {error && (
-                <div className="text-red-500 text-sm mt-2">{error}</div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-[#FFBE1A] hover:bg-[#FFBE1A]/90 text-black font-medium px-4 py-3 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {isLoading ? 'Sending...' : 'Reset Password'}
-              </button>
-
-              <div className="text-center mt-6">
-                <Link
-                  href="/auth"
-                  className="text-white/60 hover:text-white"
-                >
-                  Back to sign in
-                </Link>
-              </div>
-            </form>
           )}
+
+          {message && (
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+              <p className="text-green-500 text-sm">{message}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-1.5">
+                Email address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFBE1A] focus:border-transparent"
+                placeholder="Enter your email"
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#FFBE1A] hover:bg-[#FFBE1A]/90 text-black font-medium px-4 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="flex items-center">
+                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Sending...
+                </div>
+              ) : (
+                'Send Reset Link'
+              )}
+            </button>
+
+            <div className="text-center mt-6">
+              <Link
+                href="/auth"
+                className="text-white/60 hover:text-white"
+              >
+                Back to sign in
+              </Link>
+            </div>
+          </form>
         </div>
       </div>
     </div>
