@@ -41,3 +41,10 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user(); 
+
+--- SAP exam prep modifications 
+  -- Add a column to the profiles table to indicate if the user is a premium user
+  ALTER TABLE public.profiles ADD COLUMN is_premium BOOLEAN DEFAULT false;
+  -- Add a column to the profiles table to store the encryption key
+  ALTER TABLE public.profiles ADD COLUMN encryption_key TEXT;
+

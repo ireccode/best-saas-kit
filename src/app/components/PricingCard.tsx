@@ -115,7 +115,37 @@ const PricingCard = () => {
       buttonText: 'Contact Sales',
       priceId: 'price_enterprise',
       highlighted: false
-    }
+    },
+    {
+      name: 'SAP BTP exam prep - Free Trial',
+      price: { monthly: 0, annually: 0 },
+      description: 'For organizations with complex needs',
+      features: [
+        'Unlimited queries',
+        'Priority support',
+        'Custom integrations',
+        'Dedicated account manager',
+        'Training and onboarding',
+      ],
+      buttonText: 'Free Trial',
+      priceId: 'pprice_1Qu7jTLqVp8miPvfoxrkiKsz',
+      popular: false
+    }, 
+    {
+      name: 'SAP BTP exam prep - Premium',
+      price: { monthly: 29.99, annually: 359.88 },
+      description: 'For organizations with complex needs',
+      features: [
+        'Unlimited queries',
+        'Priority support',
+        'Custom integrations',
+        'Dedicated account manager',
+        'Training and onboarding',
+      ],
+      buttonText: 'Premium',
+      priceId: 'price_1Qu7m3LqVp8miPvfinftcF94',
+      popular: false
+    }    
   ]
 
   return (  

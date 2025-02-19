@@ -91,6 +91,44 @@ export async function POST(req: Request) {
             priceMetadata: subscription.items.data[0].price.metadata
           })
 
+          // Extract premium status from subscription metadata
+          const premium = subscription.items.data[0].price.metadata.premium === 'true'
+          console.log('Premium status from subscription:', {
+            userId: session.metadata.userId,
+            premium,
+            priceMetadata: subscription.items.data[0].price.metadata
+          })
+
+          // Store premium status in user_metadata only if premium is true
+          if (premium) {
+            try {
+              const { error: updateError } = await supabase.auth.admin.updateUserById(
+                session.metadata.userId,
+                {
+                  user_metadata: {
+                    is_premium: true
+                  }
+                }
+              )
+
+              if (updateError) {
+                console.error('Error updating user metadata:', {
+                  error: updateError,
+                  userId: session.metadata.userId,
+                  premium
+                })
+                // Log but don't throw - allow subscription process to continue
+              }
+            } catch (metadataError) {
+              console.error('Exception updating user metadata:', {
+                error: metadataError,
+                userId: session.metadata.userId,
+                premium
+              })
+              // Log but don't throw - allow subscription process to continue
+            }
+          }
+
           // Add subscription to database
           const { data: subscriptionData, error: subscriptionError } = await supabase
             .from('customer_subscriptions')

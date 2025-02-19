@@ -12,6 +12,7 @@ interface Profile {
   avatar_url?: string | null
   website?: string
   email?: string
+  is_premium?: boolean
 }
 
 export default function ProfileSettings() {
@@ -27,7 +28,7 @@ export default function ProfileSettings() {
     try {
       setError(null)
       
-      // Get user data
+      // Get user data with metadata
       const userResponse = await supabase.auth.getUser()
       console.log('Auth response:', userResponse)
       
@@ -48,7 +49,7 @@ export default function ProfileSettings() {
       // First check if profile exists
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
-        .select('id, username, full_name, avatar_url, website, email')
+        .select('id, username, full_name, avatar_url, website, email, is_premium')
         .eq('id', user.id)
 
       console.log('Profile query response:', { data: profiles, error: profileError })
@@ -57,6 +58,9 @@ export default function ProfileSettings() {
         console.error('Profile error:', profileError)
         throw new Error(`Profile error: ${profileError.message}`)
       }
+
+      // Get premium status from user metadata
+      const isPremium = user.user_metadata?.is_premium === true
 
       // Handle multiple profiles case
       if (profiles && profiles.length > 1) {
@@ -68,10 +72,27 @@ export default function ProfileSettings() {
           const { error: deleteError } = await supabase
             .from('profiles')
             .delete()
-            .in('id', duplicates.map(p => p.id))
+            .in('id', duplicates.map((p: Profile) => p.id))
           
           if (deleteError) {
             console.error('Error cleaning up duplicate profiles:', deleteError)
+          }
+        }
+        
+        // Update premium status if needed
+        if (keepProfile.is_premium !== isPremium) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ 
+              is_premium: isPremium,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', keepProfile.id)
+
+          if (updateError) {
+            console.error('Error updating premium status:', updateError)
+          } else {
+            keepProfile.is_premium = isPremium
           }
         }
         
@@ -81,14 +102,15 @@ export default function ProfileSettings() {
       else if (!profiles || profiles.length === 0) {
         console.log('No profile found, creating new profile...')
         
-        // Create initial profile with user's email
+        // Create initial profile with user's email and premium status
         const initialProfile = {
           id: user.id,
           username: '',
           full_name: '',
           avatar_url: null,
           website: '',
-          email: user.email || ''
+          email: user.email || '',
+          is_premium: isPremium
         }
 
         const { data: newProfile, error: insertError } = await supabase
@@ -110,7 +132,26 @@ export default function ProfileSettings() {
       // Handle single profile case
       else {
         console.log('Single profile found')
-        setProfile(profiles[0])
+        const existingProfile = profiles[0]
+        
+        // Update premium status if needed
+        if (existingProfile.is_premium !== isPremium) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ 
+              is_premium: isPremium,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingProfile.id)
+
+          if (updateError) {
+            console.error('Error updating premium status:', updateError)
+          } else {
+            existingProfile.is_premium = isPremium
+          }
+        }
+        
+        setProfile(existingProfile)
       }
 
     } catch (error) {
@@ -270,27 +311,34 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Profile Settings</h1>
-        <p className="mt-2 text-white/60">
-          Manage your profile information and settings.
-        </p>
-      </div>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-          <p className="text-red-500">{error}</p>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-          <p className="text-green-500">{successMessage}</p>
-        </div>
-      )}
-
+    <div className="max-w-4xl mx-auto py-8 space-y-8">
       <div className="bg-[#111111] rounded-2xl p-8 border border-white/5">
+        <h1 className="text-2xl font-bold text-white mb-8">Profile Settings</h1>
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
+            <p className="text-red-500 text-sm">{error}</p>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 mb-6">
+            <p className="text-green-500 text-sm">{successMessage}</p>
+          </div>
+        )}
+
+        {/* Premium Status Indicator - Only shown for premium users */}
+        {profile?.is_premium && (
+          <div className="mb-6 flex items-center justify-between bg-[#FFBE1A]/10 rounded-lg p-4 border border-[#FFBE1A]/20">
+            <div className="flex items-center space-x-2">
+              <span className="text-[#FFBE1A]">Premium Member</span>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFBE1A] text-black">
+                Active
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Avatar Section */}
         <div className="flex items-center mb-8 pb-8 border-b border-white/5">
           <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center overflow-hidden">
